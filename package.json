@@ -1,0 +1,21 @@
+{
+  "name": "contest-bot",
+  "description": "A contest bot for displaying contests!",
+  "version": "1.0.0",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "discord.js": "12.0.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "firebase": "^7.19.0",
+    "fs": "0.0.1-security",
+    "node-latex": "^3.0.0",
+    "request": "2.81.0"
+  },
+  "author": "",
+  "license": "ISC"
+}
