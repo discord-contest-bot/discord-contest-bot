@@ -22,7 +22,7 @@ const noAsy = str => {
 };
 
 const latexify = str => {
-  return str.replace(/\n\n/g, '\n').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/<i>/g, '\\textit\{').replace(/<\/i>|<\/b>/g, '\}').replace(/<b>/g, '\\textbf\{').replace(/<li[^>]*>/g, '\\item ').replace(/<\/li>/g, '').replace(/\n<ol[^>]*>/g, '\\begin{enumerate}').replace(/<\/ol>\n/g, '\\end{enumerate}').replace(/\n<ul[^>]*>/g, '\\begin{itemize}').replace(/<\/ul>\n/g, '\\end{itemize}').replace(/\n/g, '~\\\\').replace(/\&ge\;|\&gte\;/g, '\\ge').replace(/\&amp\;/g, '\\\&').replace(/\&nbsp;/g, '').replace(/<hr[^>]*>/g, '\\rule\{\\linewidth\}{0.5mm}').replace(/\&amp;[\s]*=/g, '&=').replace(/\\\\item/g, '\\item').replace(/\\\\end{itemize}/g, '\\end{itemize}');
+  return str.replace(/\n\n/g, '\n').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/<i>/g, '\\textit\{').replace(/<\/i>|<\/b>/g, '\}').replace(/<b>/g, '\\textbf\{').replace(/<li[^>]*>/g, '\\item ').replace(/<\/li>/g, '').replace(/\n<ol[^>]*>/g, '\\begin{enumerate}').replace(/<\/ol>\n/g, '\\end{enumerate}').replace(/\n<ul[^>]*>/g, '\\begin{itemize}').replace(/<\/ul>\n/g, '\\end{itemize}').replace(/\n/g, '~\\\\').replace(/\&ge\;|\&gte\;/g, '\\ge').replace(/\&amp\;/g, '\\\&').replace(/\&nbsp;/g, '').replace(/<hr[^>]*>/g, '\\rule\{\\linewidth\}{0.5mm}').replace(/\&amp;[\s]*=/g, '&=').replace(/\~\\\\\\item/g, '\\item').replace(/\~\\\\\\end{itemize}/g, '\\end{itemize}');
 };
 
 const makeLatex = str => {
@@ -615,14 +615,10 @@ client.on('message', async message => {
       message.channel.send("Whoops, looks like I couldn't find that problem. Try again with a **valid** problem.")
       return;
     }
-    console.log(process.env.NO_RENDER);
     if (!!process.env.NO_RENDER) {
-      await files.writeFile('problem.txt', noAsy(problem));
-      console.log(problem.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/<i>/g, '\\textit\{').replace(/<\/i>|<\/b>/g, '\}').replace(/<b>/g, '\\textbf\{').replace(/<li[^>]*>/g, '\\item ').replace(/<\/li>/g, '').replace(/<ol[^>]*>/g, '\\begin{enumerate}').replace(/<\/ol>/g, '\\end{enumerate}').replace(/<ul[^>]*>/g, '\\begin{itemize}').replace(/<\/ul>/g, '\\end{itemize}').replace(/\~\\\\n/g, 'jhsgfadiugasiugkb,twnasufdohjewiyoasd'));
       message.channel.send(makeLatex(noAsy(problem)));
       return;
     }
-    console.log("Why?")
     const msg = await message.channel.send('Fetched ' + contest.displayName + ' ' + year + ' ' + problemNumber + '. Now trying to render that.');
     const output = fs.createWriteStream(path.join(__dirname, "output.pdf"))
     const pdf = latex(makeLatex(noAsy(problem)));
@@ -652,7 +648,7 @@ client.on('message', async message => {
         }
         const onCollect = (emoji, message, i, getList) => {
           if (emoji.name === '💻' && !latexSent) {
-            message.channel.send(latexify(noAsy(problem)));
+            message.channel.send('```'+ latexify(noAsy(problem)) + '```');
             latexSent = true;
           } else if (emoji.name === '🔗' && !linkSent) {
             message.channel.send(preliminaryProblem.val().link);
