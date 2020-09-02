@@ -344,6 +344,72 @@ const getShortContestPage = _ => {
   return 'Here are the current contests:' + contestsString;
 };
 
+const getProblemInfo = async message => {
+  for (let i = 0; i < supportedContests.length; i ++) {
+    let contest = supportedContests[i];
+    if (!checkInclude(contest.aliases, message.content)) {
+      continue;
+    }
+    message.content = deepReplace(contest.aliases, message.content);
+    const numbers = message.content.match(/\d+/g);
+    if (!numbers) {
+      message.channel.send("I can't return the entire contest - that's crazy. Maybe a year would shorten stuff a lot.");
+      return;
+    }
+    const year = numbers[0];
+    if (!numbers[1]) {
+      message.channel.send("From what I see, you probably provided a year but I still need a problem number, right? It would help if I had one.");
+      return;
+    }
+    let problemNumber = numbers[1];
+    if (contest.type === 'shortlist') {
+      if (parseInt(year) >= contest.firstCategory && !(contest.needsNumber && parseInt(year) <= contest.lastNeeded )) {
+        const letters = message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)).match(/[a-zA-Z]+/g);
+        if (!letters) {
+          message.channel.send("Don't delay me like this. Where's the topic?")
+          return;
+        }
+        if (contest.picky && message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)).includes(contest.keyword.toLowerCase())) {
+          if (!letters[1]) {
+            message.channel.send("Specifications say I need something more specific, like November GENERAL (for HMMT). Provide that please");
+          }
+          problemNumber = (letters[0].substring(0, contest.maxChar) + letters[1].substring(0, contest.maxChar) + '/' + numbers[1]).toUpperCase();
+        }
+        else {
+          problemNumber = (letters[0].substring(0, contest.maxChar) + '/' + numbers[1]).toUpperCase();
+        }
+      }
+      if (contest.needsNumber && parseInt(year) <= contest.lastNeeded) {
+        if (!numbers[2]) {
+          message.channel.send("I didn't get a problem number - why is that?");
+          return;
+        }
+        const letters = message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[2], message.content.indexOf(numbers[0]) + numbers[0].length)).match(/[a-zA-Z]+/g);
+        if (!letters && parseInt(year) >= contest.firstCategory) {
+          message.channel.send("Don't delay me like this. Where's the topic?")
+          return;
+        }
+        if (contest.picky && message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)).includes(contest.keyword.toLowerCase())) {
+          if (!letters[1]) {
+            message.channel.send("Specifications say I need something more specific, like November GENERAL (for HMMT). Provide that please");
+          }
+          problemNumber = (letters[0].substring(0, contest.maxChar) + letters[1].substring(0, contest.maxChar) + numbers[1] + '/' + numbers[1]).toUpperCase();
+        }
+        else {
+          problemNumber = (letters[0].substring(0, contest.maxChar) + numbers[1] + '/' + numbers[2]).toUpperCase();
+        }
+      }
+    }
+    const preliminaryProblem = await firebase.database().ref().child(contest.name).child(year).child(problemNumber).once('value');
+    const problem = preliminaryProblem.val();
+    if (!problem) {
+      message.channel.send("Whoops, looks like I couldn't find that problem. Try again with a **valid** problem.")
+      return;
+    }
+    return problem;
+  }
+}
+
 client.on('message', async message => {
   if (message.author.bot || message.author.id === client.user.id) {
     return;
@@ -366,34 +432,6 @@ client.on('message', async message => {
         client.channels.cache.get('749407577393201222').send(message.content);
       }
       return;
-    }
-    if (message.content.includes('testing')) {
-      let latexSent = false;
-      let linkSent = false;
-      const filter = (reaction, user) => {
-        return ['🔗','💻'].includes(reaction.emoji.name) && user.id === message.author.id;
-      }
-      const onCollect = (emoji, message, i, getList) => {
-        if (emoji.name === '💻' && !latexSent) {
-          message.edit(message.content + '\nEVANNNNNNNNNN is my dude');
-          latexSent = true;
-        } else if (emoji.name === '🔗' && !linkSent) {
-          message.edit(message.content + '\n<3 EVANNNNNNNNNN is my dude');
-          linkSent = true;
-        }
-        return i;
-      }
-      const createCollectorMessage = async (message, getList) => {
-        let i = 0;
-        const collector = message.createReactionCollector(filter, { time: reactTime });
-        await collector.on('collect', async (r, user) => {
-          await r.users.remove(user.id);
-          await message.react(r.emoji);
-          i = onCollect(r.emoji, message, i, getList);
-        });
-        collector.on('end', collected => message.reactions.removeAll());
-      }
-      message.channel.send('EVANNNNNNN', {files: ['output.jpg']}).then(mesg => mesg.react('🔗')).then(mesg => mesg.message.react('💻')).then(mesg => createCollectorMessage(mesg.message, ['🔗', '💻']));;
     }
   }
   if (!message.content.startsWith(prefix) && !message.content.includes('<@!' + client.user.id + '>')) {
@@ -455,267 +493,91 @@ client.on('message', async message => {
       collector.on('end', collected => message.reactions.removeAll());
     }
     message.channel.send(contestsString).then(msg => msg.react('⬅️')).then(msg => msg.message.react('➡️')).then(msg => createCollectorMessage(msg.message, ['⬅️', '➡️']));
+    return;
   }
   if (message.content.toLowerCase().replace(/\s/g, '') === 'support') {
     message.channel.send('Join the support server: https://cryptic-hamlet-37911.herokuapp.com/support.');
+    return;
   }
   if (message.content.toLowerCase().replace(/\s/g, '') === 'directsupport') {
     message.channel.send('Join the support server: https://discord.gg/C2sYVGb');
+    return;
   }
   if (message.content.toLowerCase().replace(/\s/g, '') === 'invite') {
     message.channel.send('Invite me: https://cryptic-hamlet-37911.herokuapp.com/invite.');
+    return;
   }
   if (message.content.toLowerCase().includes('link')) {
     message.content = message.content.replace(/link/g, '');
-    for (let i = 0; i < supportedContests.length; i ++) {
-      let contest = supportedContests[i];
-      if (!checkInclude(contest.aliases, message.content)) {
-        continue;
-      }
-      message.content = deepReplace(contest.aliases, message.content);
-      const numbers = message.content.match(/\d+/g);
-      if (!numbers) {
-        message.channel.send("I can't return the entire contest - that's crazy. Maybe a year would shorten stuff a lot.");
-        return;
-      }
-      const year = numbers[0];
-      if (!numbers[1]) {
-        message.channel.send("From what I see, you probably provided a year but I still need a problem number, right? It would help if I had one.");
-        return;
-      }
-      let problemNumber = numbers[1];
-      if (contest.type === 'shortlist') {
-        if (parseInt(year) >= contest.firstCategory && !(contest.needsNumber && parseInt(year) <= contest.lastNeeded )) {
-          const letters = message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)).match(/[a-zA-Z]+/g);
-          if (!letters) {
-            message.channel.send("Don't delay me like this. Where's the topic?")
-            return;
-          }
-          if (contest.picky && message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)).includes(contest.keyword.toLowerCase())) {
-            if (!letters[1]) {
-              message.channel.send("Specifications say I need something more specific, like November GENERAL (for HMMT). Provide that please");
-            }
-            problemNumber = (letters[0].substring(0, contest.maxChar) + letters[1].substring(0, contest.maxChar) + '/' + numbers[1]).toUpperCase();
-          }
-          else {
-            problemNumber = (letters[0].substring(0, contest.maxChar) + '/' + numbers[1]).toUpperCase();
-          }
-        }
-        if (contest.needsNumber && parseInt(year) <= contest.lastNeeded) {
-          if (!numbers[2]) {
-            message.channel.send("I didn't get a problem number - why is that?");
-            continue;
-          }
-          const letters = message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[2], message.content.indexOf(numbers[0]) + numbers[0].length)).match(/[a-zA-Z]+/g);
-          if (!letters && parseInt(year) >= contest.firstCategory) {
-            message.channel.send("Don't delay me like this. Where's the topic?")
-            return;
-          }
-          if (contest.picky && message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)).includes(contest.keyword.toLowerCase())) {
-            if (!letters[1]) {
-              message.channel.send("Specifications say I need something more specific, like November GENERAL (for HMMT). Provide that please");
-            }
-            problemNumber = (letters[0].substring(0, contest.maxChar) + letters[1].substring(0, contest.maxChar) + numbers[1] + '/' + numbers[1]).toUpperCase();
-          }
-          else {
-            problemNumber = (letters[0].substring(0, contest.maxChar) + numbers[1] + '/' + numbers[2]).toUpperCase();
-          }
-        }
-      }
-      const preliminaryProblem = await firebase.database().ref().child(contest.name).child(year).child(problemNumber).child('link').once('value');
-      const problem = preliminaryProblem.val();
-      if (!problem) {
-        message.channel.send("Whoops, looks like I couldn't find that problem. Try again with a **valid** problem.")
-        return;
-      }
-      message.channel.send(problem);
-      return;
+    const problem = await getProblemInfo(message);
+    if (!!problem) {
+      message.channel.send(problem.link);
     }
-  }
-  if (message.content.toLowerCase().includes('latex')) {
-    message.content = message.content.replace(/latex/g, '');
-    for (let i = 0; i < supportedContests.length; i ++) {
-      let contest = supportedContests[i];
-      if (!checkInclude(contest.aliases, message.content)) {
-        continue;
-      }
-      message.content = deepReplace(contest.aliases, message.content);
-      const numbers = message.content.match(/\d+/g);
-      if (!numbers) {
-        message.channel.send("I can't return the entire contest - that's crazy. Maybe a year would shorten stuff a lot.");
-        return;
-      }
-      const year = numbers[0];
-      if (!numbers[1]) {
-        message.channel.send("From what I see, you probably provided a year but I still need a problem number, right? It would help if I had one.");
-        return;
-      }
-      let problemNumber = numbers[1];
-      if (contest.type === 'shortlist') {
-        if (parseInt(year) >= contest.firstCategory && !(contest.needsNumber && parseInt(year) <= contest.lastNeeded )) {
-          const letters = message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)).match(/[a-zA-Z]+/g);
-          if (!letters) {
-            message.channel.send("Don't delay me like this. Where's the topic?")
-            return;
-          }
-          if (contest.picky && message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)).includes(contest.keyword.toLowerCase())) {
-            if (!letters[1]) {
-              message.channel.send("Specifications say I need something more specific, like November GENERAL (for HMMT). Provide that please");
-            }
-            problemNumber = (letters[0].substring(0, contest.maxChar) + letters[1].substring(0, contest.maxChar) + '/' + numbers[1]).toUpperCase();
-          }
-          else {
-            problemNumber = (letters[0].substring(0, contest.maxChar) + '/' + numbers[1]).toUpperCase();
-          }
-        }
-        if (contest.needsNumber && parseInt(year) <= contest.lastNeeded) {
-          if (!numbers[2]) {
-            message.channel.send("I didn't get a problem number - why is that?");
-            continue;
-          }
-          const letters = message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[2], message.content.indexOf(numbers[0]) + numbers[0].length)).match(/[a-zA-Z]+/g);
-          if (!letters && parseInt(year) >= contest.firstCategory) {
-            message.channel.send("Don't delay me like this. Where's the topic?")
-            return;
-          }
-          if (contest.picky && message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)).includes(contest.keyword.toLowerCase())) {
-            if (!letters[1]) {
-              message.channel.send("Specifications say I need something more specific, like November GENERAL (for HMMT). Provide that please");
-            }
-            problemNumber = (letters[0].substring(0, contest.maxChar) + letters[1].substring(0, contest.maxChar) + numbers[1] + '/' + numbers[1]).toUpperCase();
-          }
-          else {
-            problemNumber = (letters[0].substring(0, contest.maxChar) + numbers[1] + '/' + numbers[2]).toUpperCase();
-          }
-        }
-      }
-      const preliminaryProblem = await firebase.database().ref().child(contest.name).child(year).child(problemNumber).child('statement').once('value');
-      const problem = preliminaryProblem.val();
-      if (!problem) {
-        message.channel.send("Whoops, looks like I couldn't find that problem. Try again with a **valid** problem.")
-        return;
-      }
-      message.channel.send(latexify(noAsy(problem)));
-      return;
-    }
-  }
-  for (let i = 0; i < supportedContests.length; i ++) {
-    let contest = supportedContests[i];
-    if (!checkInclude(contest.aliases, message.content)) {
-      continue;
-    }
-    message.content = deepReplace(contest.aliases, message.content);
-    const numbers = message.content.match(/\d+/g);
-    if (!numbers) {
-      message.channel.send("I can't return the entire contest - that's crazy. Maybe a year would shorten stuff a lot.");
-      return;
-    }
-    const year = numbers[0];
-    if (!numbers[1]) {
-      message.channel.send("From what I see, you probably provided a year but I still need a problem number, right? It would help if I had one.");
-      return;
-    }
-    let problemNumber = numbers[1];
-    if (contest.type === 'shortlist') {
-      if (parseInt(year) >= contest.firstCategory && !(contest.needsNumber && parseInt(year) <= contest.lastNeededI )) {
-        const letters = message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)).match(/[a-zA-Z]+/g);
-        if (!letters) {
-          message.channel.send("Don't delay me like this. Where's the topic?")
-          return;
-        }
-        if (contest.picky && message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)).includes(contest.keyword.toLowerCase())) {
-          if (!letters[1]) {
-            message.channel.send("Specifications say I need something more specific, like November GENERAL (for HMMT). Provide that please");
-          }
-          problemNumber = (letters[0].substring(0, contest.maxChar) + letters[1].substring(0, contest.maxChar) + '/' + numbers[1]).toUpperCase();
-        }
-        else {
-          problemNumber = (letters[0].substring(0, contest.maxChar) + '/' + numbers[1]).toUpperCase();
-        }
-      }
-      if (contest.needsNumber && parseInt(year) <= contest.lastNeeded) {
-        if (!numbers[2]) {
-          message.channel.send("I didn't get a problem number - why is that?");
-          continue;
-        }
-        const letters = message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[2], message.content.indexOf(numbers[0]) + numbers[0].length)).match(/[a-zA-Z]+/g);
-        if (!letters && parseInt(year) >= contest.firstCategory) {
-          message.channel.send("Don't delay me like this. Where's the topic?")
-          return;
-        }
-        if (contest.picky && message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)).includes(contest.keyword.toLowerCase())) {
-          if (!letters[1]) {
-            message.channel.send("Specifications say I need something more specific, like November GENERAL (for HMMT). Provide that please");
-          }
-          problemNumber = (letters[0].substring(0, contest.maxChar) + letters[1].substring(0, contest.maxChar) + numbers[1] + '/' + numbers[1]).toUpperCase();
-        }
-        else {
-          problemNumber = (letters[0].substring(0, contest.maxChar) + numbers[1] + '/' + numbers[2]).toUpperCase();
-        }
-      }
-    }
-    const preliminaryProblem = await firebase.database().ref().child(contest.name).child(year).child(problemNumber).once('value');
-    const problem = preliminaryProblem.val().statement;
-    if (!problem) {
-      message.channel.send("Whoops, looks like I couldn't find that problem. Try again with a **valid** problem.")
-      return;
-    }
-    if (!!process.env.NO_RENDER) {
-      message.channel.send(makeLatex(noAsy(problem)));
-      return;
-    }
-    const msg = await message.channel.send('Fetched ' + contest.displayName + ' ' + year + ' ' + problemNumber + '. Now trying to render that.');
-    const output = fs.createWriteStream(path.join(__dirname, "output.pdf"))
-    const pdf = latex(makeLatex(noAsy(problem)));
-
-    pdf.pipe(output)
-    pdf.on('error', err => {
-      message.channel.send('Looks like there\'s an error: ' + err + '. Please directly message <@!446065841172250638>');
-      client.channels.cache.get('747232085600632902').send('There has been an error with ' + contest.displayName + ' ' + year + ' ' + problemNumber + '. The error is as follows:\n' + err);
-    });
-    pdf.on('finish', () => {
-      exec("convert -resize '4000' -density 288 /app/output.pdf +negate -bordercolor transparent -border 30 -background black -flatten /app/output.png", (err, stderr, stdout) => {
-        if (err) {
-          message.channel.send('Looks like there\'s an error: ' + err + '. Please directly message <@!446065841172250638>');
-          client.channels.cache.get('747232085600632902').send('There has been an error with ' + contest.displayName + ' ' + year + ' ' + problemNumber + '. The error is as follows:\n' + err);
-          return;
-        }
-        if (stderr) {
-          message.channel.send('Looks like there\'s an error: ' + err + '. Please directly message <@!446065841172250638>');
-          client.channels.cache.get('747232085600632902').send('There has been an error with ' + contest.displayName + ' ' + year + ' ' + problemNumber + '. The error is as follows:\n' + stderr);
-          return;
-        }
-        msg.delete();
-        let latexSent = false;
-        let linkSent = false;
-        const filter = (reaction, user) => {
-          return ['🔗','💻'].includes(reaction.emoji.name) && user.id === message.author.id;
-        }
-        const onCollect = (emoji, message, i, getList) => {
-          if (emoji.name === '💻' && !latexSent) {
-            message.edit(message.content + '\nLaTeX:```'+ latexify(noAsy(problem)) + '```');
-            latexSent = true;
-          } else if (emoji.name === '🔗' && !linkSent) {
-            message.edit(message.content + '\nLink:' + preliminaryProblem.val().link);
-            linkSent = true;
-          }
-          return i;
-        }
-        const createCollectorMessage = async (message, getList) => {
-          let i = 0;
-          const collector = message.createReactionCollector(filter, { time: reactTime });
-          await collector.on('collect', async (r, user) => {
-            await r.users.remove(user.id);
-            await message.react(r.emoji);
-            i = onCollect(r.emoji, message, i, getList);
-          });
-          collector.on('end', collected => message.reactions.removeAll());
-        }
-        message.channel.send('Here\'s ' + contest.displayName + ' ' + year + ' ' + problemNumber, {files: ['output.png']}).then(mesg => mesg.react('🔗')).then(mesg => mesg.message.react('💻')).then(mesg => createCollectorMessage(mesg.message, ['🔗', '💻']));;
-      });
-    });
     return;
   }
+  if (message.content.toLowerCase().includes('latex')) {
+    message.content = message.content.replace(/link/g, '');
+    const problem = await getProblemInfo(message);
+    if (!!problem) {
+      message.channel.send('```' + latexify(noAsy(problem.statement)) + '```');
+    }
+    return;
+  }
+  const problem = await getProblemInfo(message);
+  if (!!process.env.NO_RENDER) {
+    message.channel.send(makeLatex(noAsy(problem.statement)));
+    return;
+  }
+  const msg = await message.channel.send('Fetched ' + contest.displayName + ' ' + year + ' ' + problemNumber + '. Now trying to render that.');
+  const output = fs.createWriteStream(path.join(__dirname, "output.pdf"))
+  const pdf = latex(makeLatex(noAsy(problem.statement)));
+
+  pdf.pipe(output)
+  pdf.on('error', err => {
+    message.channel.send('Looks like there\'s an error: ' + err + '. Please directly message <@!446065841172250638>');
+    client.channels.cache.get('747232085600632902').send('There has been an error with ' + contest.displayName + ' ' + year + ' ' + problemNumber + '. The error is as follows:\n' + err);
+  });
+  pdf.on('finish', () => {
+    exec("convert -resize '4000' -density 288 /app/output.pdf +negate -bordercolor transparent -border 30 -background black -flatten /app/output.png", (err, stderr, stdout) => {
+      if (err) {
+        message.channel.send('Looks like there\'s an error: ' + err + '. Please directly message <@!446065841172250638>');
+        client.channels.cache.get('747232085600632902').send('There has been an error with ' + contest.displayName + ' ' + year + ' ' + problemNumber + '. The error is as follows:\n' + err);
+        return;
+      }
+      if (stderr) {
+        message.channel.send('Looks like there\'s an error: ' + err + '. Please directly message <@!446065841172250638>');
+        client.channels.cache.get('747232085600632902').send('There has been an error with ' + contest.displayName + ' ' + year + ' ' + problemNumber + '. The error is as follows:\n' + stderr);
+        return;
+      }
+      msg.delete();
+      let latexSent = false;
+      let linkSent = false;
+      const filter = (reaction, user) => {
+        return ['🔗','💻'].includes(reaction.emoji.name) && user.id === message.author.id;
+      }
+      const onCollect = (emoji, message, i, getList) => {
+        if (emoji.name === '💻' && !latexSent) {
+          message.edit(message.content + '\nLaTeX:```'+ latexify(noAsy(problem.statement)) + '```');
+          latexSent = true;
+        } else if (emoji.name === '🔗' && !linkSent) {
+          message.edit(message.content + '\nLink:' + problem.link);
+          linkSent = true;
+        }
+        return i;
+      }
+      const createCollectorMessage = async (message, getList) => {
+        let i = 0;
+        const collector = message.createReactionCollector(filter, { time: reactTime });
+        await collector.on('collect', async (r, user) => {
+          await r.users.remove(user.id);
+          await message.react(r.emoji);
+          i = onCollect(r.emoji, message, i, getList);
+        });
+        collector.on('end', collected => message.reactions.removeAll());
+      }
+      message.channel.send('Here\'s ' + contest.displayName + ' ' + year + ' ' + problemNumber, {files: ['output.png']}).then(mesg => mesg.react('🔗')).then(mesg => mesg.message.react('💻')).then(mesg => createCollectorMessage(mesg.message, ['🔗', '💻']));;
+    });
+  });
 });
 
 // THIS  MUST  BE  THIS  WAY
