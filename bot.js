@@ -204,8 +204,8 @@ const supportedContests = [
     name: 'canadamo-links',
     displayName: 'Canada Mathematical Olympiad',
     aliases: [
-      'CMO',
       'Canada Mathematical Olympiad',
+      'Canada'
     ],
     type: 'regular',
   },
@@ -432,7 +432,12 @@ const createReactions = async (message, reactions, functions, msg) => {
     let i = 0;
     const collector = message.createReactionCollector(filter, { time: reactTime });
     await collector.on('collect', async (r, user) => {
-      await r.users.remove(user.id);
+      try {
+        await r.users.remove(user.id);
+      }
+      catch (e) {
+        message.channel.send("I don't have permissions to manage reactions. Ask the higher ups to grant me this AWESOME power so I can actually tell what you want.")
+      }
       await message.react(r.emoji);
       i = await onCollect(r.emoji, message, i, getList);
     });
@@ -576,7 +581,7 @@ client.on('message', async message => {
         return;
       }
       msg.delete();
-      message.channel.send('Here\'s ' + contest.displayName + ' ' + year + ' ' + problemNumber, {files: ['output.png']}).then(msg => createReactions(message, ['🔗', '💻'], [(message, clicked, i) => {
+      message.channel.send('Here\'s ' + contest.displayName + ' ' + year + ' ' + problemNumber, {files: ['output.png']}).then(msg => createReactions(message, ['💻', '🔗'], [(message, clicked, i) => {
         if (!clicked) {
           message.edit(message.content + '\nLaTeX:```'+ latexify(noAsy(problem.statement)) + '```');
           return 0;
