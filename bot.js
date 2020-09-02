@@ -421,7 +421,7 @@ client.on('message', async message => {
         { name: 'Prefix', value: 'The current prefixes are \`' + prefix + '\`, but a mention works perfectly fine (<@746943730510200893>).'},
         { name: 'Contests', value: 'I have many contests available. Use `[prefix] contests` to see them all.'},
         { name: 'Support server', value: '[Join Us Here](https://discord.gg/C2sYVGb)'},
-        { name: 'Invite Me', value: '[Invite Contest Bot to Your Server](https://cryptic-hamlet-37911.herokuapp.com/invite)'},
+        { name: 'Invite Me', value: '[Invite Contest Bot to Your Server](https://discord.com/api/oauth2/authorize?client_id=746943730510200893&permissions=100416&scope=bot)'},
     	)
     	.setTimestamp()
     	.setFooter('Contact me at Circumrectangular Hyperbola#8766', 'https://i1.sndcdn.com/artworks-000219620854-jeksn1-t500x500.jpg');
