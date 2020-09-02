@@ -205,6 +205,7 @@ const supportedContests = [
     displayName: 'Canada Mathematical Olympiad',
     aliases: [
       'Canada Mathematical Olympiad',
+      'Canada MO',
       'Canada'
     ],
     type: 'regular',
@@ -255,6 +256,25 @@ const supportedContests = [
       'Math Prize For Girls',
     ],
     type: 'regular',
+  },
+  {
+    name: 'benelux-links',
+    displayName: 'Benelux',
+    aliases: [
+      'Benelux'
+    ],
+    type: 'regular'
+  },
+  {
+    name: 'brazil-links',
+    displayName: 'Brazil National Olympiad',
+    aliases: [
+      'Brazil',
+      'Brazil National Olympiad',
+      'Brazil MO',
+      'Brazil Math Olympiad'
+    ],
+    type: 'regular'
   },
 ]
 
@@ -453,14 +473,14 @@ client.on('message', async message => {
   }
   if (moderators.includes(parseInt(message.author.id)) && message.content.startsWith(mod_prefix)) {
     message.content = message.content.replace(new RegExp(mod_prefix, 'g'), '');
-    if (message.content.includes('say ')) {
-      message.delete();
-      message.channel.send(message.content.replace('say ', ''));
-      return;
-    }
     if (message.content.includes('get contests')) {
       message.delete();
       message.channel.send(getShortContestPage());
+      return;
+    }
+    if (message.content.includes('say ')) {
+      message.delete();
+      message.channel.send(message.content.replace('say ', ''));
       return;
     }
     if (message.content.includes('log')) {
@@ -469,6 +489,18 @@ client.on('message', async message => {
         client.channels.cache.get('749407577393201222').send(message.content);
       }
       return;
+    }
+    if (message.guild.id !== '747227380786921493') {
+      return;
+    }
+    if (message.content.includes('purge')) {
+      const numbers = message.content.match(/\d+/g);
+      if (!numbers || !numbers[0]) {
+        message.channel.send('Please next time tell me how many messages to purge!');
+        return;
+      }
+      let fetched = await message.channel.messages.fetch({limit: Math.min(100, parseInt(numbers[0]) + 1)});
+      message.channel.bulkDelete(fetched);
     }
   }
   if (!message.content.startsWith(prefix) && !message.content.includes('<@!' + client.user.id + '>')) {
