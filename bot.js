@@ -406,7 +406,7 @@ const getProblemInfo = async message => {
       message.channel.send("Whoops, looks like I couldn't find that problem. Try again with a **valid** problem.")
       return;
     }
-    return problem;
+    return { problem, contest };
   }
 };
 
@@ -548,7 +548,7 @@ client.on('message', async message => {
     }
     return;
   }
-  const problem = await getProblemInfo(message);
+  const { problem, contest } = await getProblemInfo(message);
   if (!problem) return;
   if (!!process.env.NO_RENDER) {
     message.channel.send(makeLatex(noAsy(problem.statement)));
@@ -602,7 +602,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/invite", (req, res) => {
-  res.send(`<meta http-equiv="Refresh" content="0; url='https://discord.com/api/oauth2/authorize?client_id=746943730510200893&permissions=100416&scope=bot'" />`)
+  res.send(`<meta http-equiv="Refresh" content="0; url='https://discord.com/api/oauth2/authorize?client_id=746943730510200893&permissions=124992&scope=bot'" />`)
 });
 
 app.get("/support", (req, res) => {
