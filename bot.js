@@ -406,7 +406,7 @@ const getProblemInfo = async message => {
       message.channel.send("Whoops, looks like I couldn't find that problem. Try again with a **valid** problem.")
       return;
     }
-    return { problem, contest };
+    return { problem, contest, year, problemNumber };
   }
 };
 
@@ -548,7 +548,7 @@ client.on('message', async message => {
     }
     return;
   }
-  const { problem, contest } = await getProblemInfo(message);
+  const { problem, contest, year, problemNumber } = await getProblemInfo(message);
   if (!problem) return;
   if (!!process.env.NO_RENDER) {
     message.channel.send(makeLatex(noAsy(problem.statement)));
