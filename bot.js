@@ -332,7 +332,7 @@ const getContestPage = index => {
     contestsString += '\n';
   }
   contestsString += '```';
-  return 'Here are the contests. Note that any of the aliases after the name of the contest can be used to call the contest. In addition, note that I only process the first contest (my definition of first) and in addition, all info must come between the year and problem number (they\'re in that order). For example, to request ISL 2004 Algebra 5, you **must** use 2004 ISL Algebra 5, 2004 ISL A5, etc (note the position of ISL is irrelevant, but Algebra or A is between the year and problem number).' + contestsString;
+  return {string: 'Here are the contests. Note that any of the aliases after the name of the contest can be used to call the contest. In addition, note that I only process the first contest (my definition of first) and in addition, all info must come between the year and problem number (they\'re in that order). For example, to request ISL 2004 Algebra 5, you **must** use 2004 ISL Algebra 5, 2004 ISL A5, etc (note the position of ISL is irrelevant, but Algebra or A is between the year and problem number).' + contestsString, index };
 };
 
 const getShortContestPage = _ => {
@@ -408,7 +408,38 @@ const getProblemInfo = async message => {
     }
     return problem;
   }
-}
+};
+
+const createReactions = async (message, reactions, functions, msg) => {
+  await reactions.forEach(async r => {
+    await msg.react(r);
+  });
+  let clicked = {};
+  const filter = (reaction, user) => {
+    return reactions.includes(reaction.emoji.name) && user.id === message.author.id;
+  }
+  const onCollect = async (emoji, message, i, getList) => {
+    await reactions.forEach(async (r, idx) => {
+      if (emoji.name === r) {
+        i = await functions[idx](message, clicked[idx], i);
+        clicked[idx] = true;
+        return;
+      }
+    });
+    return i;
+  }
+  const createCollectorMessage = async (message, getList) => {
+    let i = 0;
+    const collector = message.createReactionCollector(filter, { time: reactTime });
+    await collector.on('collect', async (r, user) => {
+      await r.users.remove(user.id);
+      await message.react(r.emoji);
+      i = await onCollect(r.emoji, message, i, getList);
+    });
+    collector.on('end', collected => message.reactions.removeAll());
+  }
+  createCollectorMessage(msg, reactions);
+};
 
 client.on('message', async message => {
   if (message.author.bot || message.author.id === client.user.id) {
@@ -470,29 +501,16 @@ client.on('message', async message => {
     message.channel.send('Hi there', {files: ['creator-pfp.jpg']});
   }
   if (message.content.toLowerCase().replace(/\s/g, '') === 'contests') {
-    let contestsString = getContestPage(0);
-    const filter = (reaction, user) => {
-      return ['⬅️','➡️'].includes(reaction.emoji.name) && user.id === message.author.id;
-    }
-    const onCollect = (emoji, message, i, getList) => {
-      if (emoji.name === '⬅️') {
-        message.edit(getContestPage(--i));
-      } else if (emoji.name === '➡️') {
-        message.edit(getContestPage(++i));
-      }
-      return i;
-    }
-    const createCollectorMessage = async (message, getList) => {
-      let i = 0;
-      const collector = message.createReactionCollector(filter, { time: reactTime });
-      await collector.on('collect', async (r, user) => {
-        await r.users.remove(user.id);
-        await message.react(r.emoji);
-        i = onCollect(r.emoji, message, i, getList);
-      });
-      collector.on('end', collected => message.reactions.removeAll());
-    }
-    message.channel.send(contestsString).then(msg => msg.react('⬅️')).then(msg => msg.message.react('➡️')).then(msg => createCollectorMessage(msg.message, ['⬅️', '➡️']));
+    let contestsString = getContestPage(0).string;
+    message.channel.send(contestsString).then(msg => createReactions(message, ['⬅️', '➡️'], [(message, clicked, i) => {
+      let contest = getContestPage(--i);
+      message.edit(contest.string);
+      return contest.index;
+    }, (message, clicked, i) => {
+      let contest = getContestPage(++i);
+      message.edit(contest.string);
+      return contest.index;
+    }], msg));
     return;
   }
   if (message.content.toLowerCase().replace(/\s/g, '') === 'support') {
@@ -506,6 +524,13 @@ client.on('message', async message => {
   if (message.content.toLowerCase().replace(/\s/g, '') === 'invite') {
     message.channel.send('Invite me: https://cryptic-hamlet-37911.herokuapp.com/invite.');
     return;
+  }
+  if (message.content.toLowerCase().replace(/\s/g, '') === 'directinvite') {
+    message.channel.send('Invite me: https://discord.com/api/oauth2/authorize?client_id=746943730510200893&permissions=100416&scope=bot.');
+    return;
+  }
+  if (message.content.toLowerCase().includes('bug report')) {
+    const msg = await message.channel.send('This is the bug report you are sending:\n' + message.content.replace('bug report', '').trim() + '\n Are you sure you want to do this? React with :yes: for yes and with :no: otherwise.');
   }
   if (message.content.toLowerCase().includes('link')) {
     message.content = message.content.replace(/link/g, '');
@@ -524,6 +549,7 @@ client.on('message', async message => {
     return;
   }
   const problem = await getProblemInfo(message);
+  if (!problem) return;
   if (!!process.env.NO_RENDER) {
     message.channel.send(makeLatex(noAsy(problem.statement)));
     return;
@@ -550,38 +576,22 @@ client.on('message', async message => {
         return;
       }
       msg.delete();
-      let latexSent = false;
-      let linkSent = false;
-      const filter = (reaction, user) => {
-        return ['🔗','💻'].includes(reaction.emoji.name) && user.id === message.author.id;
-      }
-      const onCollect = (emoji, message, i, getList) => {
-        if (emoji.name === '💻' && !latexSent) {
+      message.channel.send('Here\'s ' + contest.displayName + ' ' + year + ' ' + problemNumber, {files: ['output.png']}).then(msg => createReactions(message, ['🔗', '💻'], [(message, clicked, i) => {
+        if (!clicked) {
           message.edit(message.content + '\nLaTeX:```'+ latexify(noAsy(problem.statement)) + '```');
-          latexSent = true;
-        } else if (emoji.name === '🔗' && !linkSent) {
-          message.edit(message.content + '\nLink:' + problem.link);
-          linkSent = true;
+          return 0;
         }
-        return i;
-      }
-      const createCollectorMessage = async (message, getList) => {
-        let i = 0;
-        const collector = message.createReactionCollector(filter, { time: reactTime });
-        await collector.on('collect', async (r, user) => {
-          await r.users.remove(user.id);
-          await message.react(r.emoji);
-          i = onCollect(r.emoji, message, i, getList);
-        });
-        collector.on('end', collected => message.reactions.removeAll());
-      }
-      message.channel.send('Here\'s ' + contest.displayName + ' ' + year + ' ' + problemNumber, {files: ['output.png']}).then(mesg => mesg.react('🔗')).then(mesg => mesg.message.react('💻')).then(mesg => createCollectorMessage(mesg.message, ['🔗', '💻']));;
+      }, (message, clicked, i) => {
+        if (!clicked) {
+          message.edit(message.content + '\nLink: ' + problem.link);
+          return 0;
+        }
+      }], msg));
     });
   });
 });
 
-// THIS  MUST  BE  THIS  WAY
-client.login(process.env.BOT_TOKEN);//BOT_TOKEN is the Client Secret
+client.login(process.env.BOT_TOKEN);
 
 app.listen(port, () => {
   console.log(`Listening to requests on http://localhost:${port}`);
