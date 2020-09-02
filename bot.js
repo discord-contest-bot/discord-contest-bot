@@ -318,10 +318,8 @@ const min = (number1, number2) => {
 
 const getContestPage = index => {
   let contestsString = '```markdown\n';
-  console.log(index);
   let length = (Math.floor((supportedContests.length - 1) / 10) + 1);
   index = (index + length)  % length;
-  console.log(index);
   for (let i = index * 10; i < min(supportedContests.length, (index + 1) * 10); i ++ ) {
     contestsString += (i + 1).toString() + '. ' + supportedContests[i].displayName + ': ';
 
@@ -363,8 +361,39 @@ client.on('message', async message => {
       return;
     }
     if (message.content.includes('log')) {
-      client.channels.cache.get('749407577393201222').send('CHICKEN');
+      message.content.replace('log', '').trim();
+      if (message.content) {
+        client.channels.cache.get('749407577393201222').send(message.content);
+      }
       return;
+    }
+    if (message.content.includes('testing')) {
+      let latexSent = false;
+      let linkSent = false;
+      const filter = (reaction, user) => {
+        return ['🔗','💻'].includes(reaction.emoji.name) && user.id === message.author.id;
+      }
+      const onCollect = (emoji, message, i, getList) => {
+        if (emoji.name === '💻' && !latexSent) {
+          message.edit(message.content + '\nEVANNNNNNNNNN is my dude');
+          latexSent = true;
+        } else if (emoji.name === '🔗' && !linkSent) {
+          message.edit(message.content + '\n<3 EVANNNNNNNNNN is my dude');
+          linkSent = true;
+        }
+        return i;
+      }
+      const createCollectorMessage = async (message, getList) => {
+        let i = 0;
+        const collector = message.createReactionCollector(filter, { time: reactTime });
+        await collector.on('collect', async (r, user) => {
+          await r.users.remove(user.id);
+          await message.react(r.emoji);
+          i = onCollect(r.emoji, message, i, getList);
+        });
+        collector.on('end', collected => message.reactions.removeAll());
+      }
+      message.channel.send('EVANNNNNNN', {files: ['output.jpg']}).then(mesg => mesg.react('🔗')).then(mesg => mesg.message.react('💻')).then(mesg => createCollectorMessage(mesg.message, ['🔗', '💻']));;
     }
   }
   if (!message.content.startsWith(prefix) && !message.content.includes('<@!' + client.user.id + '>')) {
@@ -391,7 +420,8 @@ client.on('message', async message => {
     		{ name: 'Help Command', value: 'You can use `[prefix] help` to get my attention.' },
         { name: 'Prefix', value: 'The current prefixes are \`' + prefix + '\`, but a mention works perfectly fine (<@746943730510200893>).'},
         { name: 'Contests', value: 'I have many contests available. Use `[prefix] contests` to see them all.'},
-        { name: 'Support server', value: '[Join Us Here](https://discord.gg/C2sYVGb)'}
+        { name: 'Support server', value: '[Join Us Here](https://discord.gg/C2sYVGb)'},
+        { name: 'Invite Me', value: '[Invite Contest Bot to Your Server](https://cryptic-hamlet-37911.herokuapp.com/invite)'},
     	)
     	.setTimestamp()
     	.setFooter('Contact me at Circumrectangular Hyperbola#8766', 'https://i1.sndcdn.com/artworks-000219620854-jeksn1-t500x500.jpg');
@@ -427,7 +457,13 @@ client.on('message', async message => {
     message.channel.send(contestsString).then(msg => msg.react('⬅️')).then(msg => msg.message.react('➡️')).then(msg => createCollectorMessage(msg.message, ['⬅️', '➡️']));
   }
   if (message.content.toLowerCase().replace(/\s/g, '') === 'support') {
+    message.channel.send('Join the support server: https://cryptic-hamlet-37911.herokuapp.com/support.');
+  }
+  if (message.content.toLowerCase().replace(/\s/g, '') === 'directsupport') {
     message.channel.send('Join the support server: https://discord.gg/C2sYVGb');
+  }
+  if (message.content.toLowerCase().replace(/\s/g, '') === 'invite') {
+    message.channel.send('Invite me: https://cryptic-hamlet-37911.herokuapp.com/invite.');
   }
   if (message.content.toLowerCase().includes('link')) {
     message.content = message.content.replace(/link/g, '');
@@ -657,10 +693,10 @@ client.on('message', async message => {
         }
         const onCollect = (emoji, message, i, getList) => {
           if (emoji.name === '💻' && !latexSent) {
-            message.channel.send('```'+ latexify(noAsy(problem)) + '```');
+            message.edit(message.content + '\nLaTeX:```'+ latexify(noAsy(problem)) + '```');
             latexSent = true;
           } else if (emoji.name === '🔗' && !linkSent) {
-            message.channel.send(preliminaryProblem.val().link);
+            message.edit(message.content + '\nLink:' + preliminaryProblem.val().link);
             linkSent = true;
           }
           return i;
@@ -691,4 +727,12 @@ app.listen(port, () => {
 
 app.get("/", (req, res) => {
   res.send(`I'm contest bot! More information soon to come about me!`)
+});
+
+app.get("/invite", (req, res) => {
+  res.send(`<meta http-equiv="Refresh" content="0; url='https://discord.com/api/oauth2/authorize?client_id=746943730510200893&permissions=100416&scope=bot'" />`)
+});
+
+app.get("/support", (req, res) => {
+  res.send(`<meta http-equiv="Refresh" content="0; url='https://discord.gg/C2sYVGb'" />`)
 });
