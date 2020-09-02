@@ -311,6 +311,7 @@ client.on('ready', () => {
 });
 
 const reactTime = 60000;
+const replyTime = 15000;
 
 const min = (number1, number2) => {
   return (number1 > number2) ? number2 : number1;
@@ -414,10 +415,10 @@ const createReactions = async (message, reactions, functions, msg) => {
   await reactions.forEach(async r => {
     await msg.react(r);
   });
-  let clicked = {};
   const filter = (reaction, user) => {
-    return reactions.includes(reaction.emoji.name) && user.id === message.author.id;
+    return (reactions.includes(reaction.emoji.name) && user.id === message.author.id);
   }
+  let clicked = {};
   const onCollect = async (emoji, message, i, getList) => {
     await reactions.forEach(async (r, idx) => {
       if (emoji.name === r) {
@@ -494,6 +495,8 @@ client.on('message', async message => {
     		{ name: 'Help Command', value: 'You can use `[prefix] help` to get my attention.' },
         { name: 'Prefix', value: 'The current prefixes are \`' + prefix + '\`, but a mention works perfectly fine (<@746943730510200893>).'},
         { name: 'Contests', value: 'I have many contests available. Use `[prefix] contests` to see them all.'},
+        { name: 'Report a Bug', value: 'Use \`' + prefix + ' bug reports [content]\` to report a bug!'},
+        { name: 'Suggest a Contest', value: 'Use \`' + prefix + ' suggest contest\` to start the contest suggestion helper!'},
         { name: 'Support server', value: '[Join Us Here](https://discord.gg/C2sYVGb)'},
         { name: 'Invite Me', value: '[Invite Contest Bot to Your Server](https://discord.com/api/oauth2/authorize?client_id=746943730510200893&permissions=100416&scope=bot)'},
     	)
@@ -535,7 +538,57 @@ client.on('message', async message => {
     return;
   }
   if (message.content.toLowerCase().includes('bug report')) {
-    const msg = await message.channel.send('This is the bug report you are sending:\n' + message.content.replace('bug report', '').trim() + '\n Are you sure you want to do this? React with :yes: for yes and with :no: otherwise.');
+    if (!message.content.replace('bug report', '').trim()) {
+      message.channel.send('Send in a bug report, such as using `' + prefix + ' bug report 2012 ISL C2 actually has an incorrect spelling of the.`');
+      return;
+    }
+    message.channel.send('This is the bug report you are sending:\n' + message.content.replace('bug report', '').trim() + '\n Are you sure you want to do this? React with 🇾 for yes and with 🇳otherwise.').then(msg => createReactions(message, ['🇾', '🇳'], [(msg, clicked, i) => {
+      if (i !== 823698652948698347983475073498579837947) {
+        msg.edit('You sent the following bug report:\n' + message.content.replace('bug report', '').trim());
+        client.channels.cache.get('747232085600632902').send('Bug report from <@' + message.author.id + '>:\n' + message.content.replace('bug report', '').trim());
+      }
+      return 823698652948698347983475073498579837947;
+    }, (message, clicked, i) => {
+      if (i !== 823698652948698347983475073498579837947) {
+        message.edit('Aborted!');
+      }
+      return 823698652948698347983475073498579837947;
+    }], msg));
+    return;
+  }
+  if (message.content.toLowerCase().includes('suggest contest')) {
+    await message.channel.send('What is the name of the contest? Use `c` to abort at any time. You have 15 seconds, starting ... now!');
+    const collector = message.channel.createMessageCollector(msg => msg.author.id === message.author.id, { max: 1, time: replyTime });
+    collector.on('collect', async m => {
+      if (m.content.toLowerCase() === 'c') {
+        message.channel.send('Aborted!');
+        return;
+      }
+      const contest = m.content.trim();
+      await message.channel.send('Alright, you want to add ' + contest + '. What\'s the link to the AoPS contest collection of all such problems?');
+      const collection = message.channel.createMessageCollector(msg => msg.author.id === message.author.id, { max: 1, time: replyTime });
+      collection.on('collect', async m => {
+        if (m.content.toLowerCase() === 'c') {
+          message.channel.send('Aborted!');
+          return;
+        }
+        const link = m.content.trim();
+        message.channel.send('You\'re sending ' + contest + ' with link ' + link + '.\n\n Are you sure you want to do this? React with 🇾 for yes and with 🇳otherwise.').then(msg => createReactions(message, ['🇾', '🇳'], [(msg, clicked, i) => {
+          if (i !== 823698652948698347983475073498579837947) {
+            const string = 'Contest: ' + contest + '\nLink: ' + link;
+            msg.edit('You sent the following contest suggestion:\n' + string);
+            client.channels.cache.get('747937557987328110').send('Contest suggestion from <@' + message.author.id + '>:\n' + string.trim());
+          }
+          return 823698652948698347983475073498579837947;
+        }, (message, clicked, i) => {
+          if (i !== 823698652948698347983475073498579837947) {
+            message.edit('Aborted!');
+          }
+          return 823698652948698347983475073498579837947;
+        }], msg));
+      })
+    });
+    return;
   }
   if (message.content.toLowerCase().includes('link')) {
     message.content = message.content.replace(/link/g, '');
@@ -553,8 +606,9 @@ client.on('message', async message => {
     }
     return;
   }
-  const { problem, contest, year, problemNumber } = await getProblemInfo(message);
-  if (!problem) return;
+  const result = await getProblemInfo(message);
+  if (!result) return;
+  const { problem, contest, year, problemNumber } = result;
   if (!!process.env.NO_RENDER) {
     message.channel.send(makeLatex(noAsy(problem.statement)));
     return;
