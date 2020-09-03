@@ -10,6 +10,7 @@ const latex = require('node-latex');
 const fs = require('fs');
 const files = require('fs').promises;
 const { exec } = require('child_process');
+const { getContestPage, getShortContestPage } = require('./helpers/contestInfo.js');
 
 const prefix = process.env.CUSTOM_PREFIX || 'gimme ';
 const mod_prefix = process.env.MOD_PREFIX || 'do ';
@@ -337,34 +338,6 @@ const min = (number1, number2) => {
   return (number1 > number2) ? number2 : number1;
 };
 
-const getContestPage = index => {
-  let contestsString = '```markdown\n';
-  let length = (Math.floor((supportedContests.length - 1) / 10) + 1);
-  index = (index + length)  % length;
-  for (let i = index * 10; i < min(supportedContests.length, (index + 1) * 10); i ++ ) {
-    contestsString += (i + 1).toString() + '. ' + supportedContests[i].displayName + ': ';
-
-    supportedContests[i].aliases.forEach((contest, index) => {
-      if (index !== 0) {
-        contestsString += ', ';
-      }
-      contestsString += contest;
-    });
-    contestsString += '\n';
-  }
-  contestsString += '```';
-  return {string: 'Here are the contests. Note that any of the aliases after the name of the contest can be used to call the contest. In addition, note that I only process the first contest (my definition of first) and in addition, all info must come between the year and problem number (they\'re in that order). For example, to request ISL 2004 Algebra 5, you **must** use 2004 ISL Algebra 5, 2004 ISL A5, etc (note the position of ISL is irrelevant, but Algebra or A is between the year and problem number).' + contestsString, index };
-};
-
-const getShortContestPage = _ => {
-  let contestsString = '```markdown\n';
-  for (let i = 0; i < supportedContests.length; i ++ ) {
-    contestsString += (i + 1).toString() + '. ' + supportedContests[i].displayName + '\n';
-  }
-  contestsString += '```';
-  return 'Here are the current contests:' + contestsString;
-};
-
 const getProblemInfo = async message => {
   for (let i = 0; i < supportedContests.length; i ++) {
     let contest = supportedContests[i];
@@ -475,7 +448,7 @@ client.on('message', async message => {
     message.content = message.content.replace(new RegExp(mod_prefix, 'g'), '');
     if (message.content.includes('get contests')) {
       message.delete();
-      message.channel.send(getShortContestPage());
+      message.channel.send(getShortContestPage(supportedContests));
       return;
     }
     if (message.content.includes('say ')) {
@@ -508,11 +481,13 @@ client.on('message', async message => {
   }
   message.content = message.content.replace(new RegExp(prefix, 'g'), '').replace(new RegExp('<@!' + client.user.id + '>', 'g'), '');
   if (message.content.toLowerCase().includes('ping')) {
-     message.reply('Pong!');
+     const msg = await message.reply(`Pong`);
+     msg.edit(`Pong: ${msg.createdTimestamp - message.createdTimestamp}`);
      return;
   }
   if (message.content.toLowerCase().includes('pong')) {
-     message.reply('Ping!');
+     const msg = await message.reply(`Ping`);
+     msg.edit(`Ping: ${msg.createdTimestamp - message.createdTimestamp}`);
      return;
   }
   if (message.content.toLowerCase().includes('help') || !message.content.replace(/\s/g, '')) {
@@ -541,13 +516,13 @@ client.on('message', async message => {
     message.channel.send('Hi there', {files: ['creator-pfp.jpg']});
   }
   if (message.content.toLowerCase().replace(/\s/g, '') === 'contests') {
-    let contestsString = getContestPage(0).string;
+    let contestsString = getContestPage(0, supportedContests).string;
     message.channel.send(contestsString).then(msg => createReactions(message, ['⬅️', '➡️'], [(message, clicked, i) => {
-      let contest = getContestPage(--i);
+      let contest = getContestPage(--i, supportedContests);
       message.edit(contest.string);
       return contest.index;
     }, (message, clicked, i) => {
-      let contest = getContestPage(++i);
+      let contest = getContestPage(++i, supportedContests);
       message.edit(contest.string);
       return contest.index;
     }], msg));
