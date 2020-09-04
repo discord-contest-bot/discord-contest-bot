@@ -318,6 +318,36 @@ const supportedContests = [
     maxChar: 1,
     needsNumber: false
   },
+  {
+    name: 'philippine-links',
+    displayName: 'Philipine Math Olympiad',
+    aliases: [
+      'Philipine Math Olympiad',
+      'Philipine MO',
+      'Philipine National Olympiad',
+      'Philipine',
+    ],
+    type: 'regular'
+  },
+  {
+    name: 'serbia-links',
+    displayName: 'Serbia Math Olympiad',
+    aliases: [
+      'Serbia Math Olympiad',
+      'Serbia MO',
+      'Serbia National Olympiad',
+      'Serbia',
+    ],
+    type: 'regular'
+  },
+  {
+    name: 'elmo-links',
+    displayName: 'ELMO',
+    aliases: [
+      'ELMO',
+    ],
+    type: 'regular'
+  },
 ]
 
 const checkInclude = (arr, str) => {
