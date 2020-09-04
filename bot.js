@@ -517,12 +517,12 @@ client.on('message', async message => {
   message.content = message.content.replace(new RegExp(prefix, 'g'), '').replace(new RegExp('<@!' + client.user.id + '>', 'g'), '');
   if (message.content.toLowerCase().includes('ping')) {
      const msg = await message.reply(`Pong`);
-     msg.edit(`Pong: ${msg.createdTimestamp - message.createdTimestamp} ms.`);
+     msg.edit(`<@` + message.author.id + `>, Pong: ${msg.createdTimestamp - message.createdTimestamp} ms.`);
      return;
   }
   if (message.content.toLowerCase().includes('pong')) {
      const msg = await message.reply(`Ping`);
-     msg.edit(`Ping: ${msg.createdTimestamp - message.createdTimestamp} ms.`);
+     msg.edit(`<@` + message.author.id + `>, Ping: ${msg.createdTimestamp - message.createdTimestamp} ms.`);
      return;
   }
   if (message.content.toLowerCase().includes('help') || !message.content.replace(/\s/g, '')) {
