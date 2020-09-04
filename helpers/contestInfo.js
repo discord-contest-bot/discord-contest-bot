@@ -2,7 +2,7 @@ const getContestPage = (index, supportedContests) => {
   let contestsString = '```markdown\n';
   let length = (Math.floor((supportedContests.length - 1) / 10) + 1);
   index = (index + length)  % length;
-  for (let i = index * 10; i < Math.min(supportedContests.length, (index + 1) * 10); i ++ ) {
+  for (let i = index * 10; i < min(supportedContests.length, (index + 1) * 10); i ++ ) {
     contestsString += (i + 1).toString() + '. ' + supportedContests[i].displayName + ': ';
 
     supportedContests[i].aliases.forEach((contest, index) => {

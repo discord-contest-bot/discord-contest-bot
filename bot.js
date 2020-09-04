@@ -11,6 +11,7 @@ const fs = require('fs');
 const files = require('fs').promises;
 const { exec } = require('child_process');
 const { getContestPage, getShortContestPage } = require('./helpers/contestInfo.js');
+const { createReactions, createMessages } = require('./helpers/createCollectors.js');
 
 const prefix = process.env.CUSTOM_PREFIX || 'gimme ';
 const mod_prefix = process.env.MOD_PREFIX || 'do ';
@@ -331,9 +332,6 @@ client.on('ready', () => {
     console.log('I am ready!');
 });
 
-const reactTime = 60000;
-const replyTime = 15000;
-
 const min = (number1, number2) => {
   return (number1 > number2) ? number2 : number1;
 };
@@ -404,42 +402,6 @@ const getProblemInfo = async message => {
   }
 };
 
-const createReactions = async (message, reactions, functions, msg) => {
-  await reactions.forEach(async r => {
-    await msg.react(r);
-  });
-  const filter = (reaction, user) => {
-    return (reactions.includes(reaction.emoji.name) && user.id === message.author.id);
-  }
-  let clicked = {};
-  const onCollect = async (emoji, message, i, getList) => {
-    await reactions.forEach(async (r, idx) => {
-      if (emoji.name === r) {
-        i = await functions[idx](message, clicked[idx], i);
-        clicked[idx] = true;
-        return;
-      }
-    });
-    return i;
-  }
-  const createCollectorMessage = async (message, getList) => {
-    let i = 0;
-    const collector = message.createReactionCollector(filter, { time: reactTime });
-    await collector.on('collect', async (r, user) => {
-      try {
-        await r.users.remove(user.id);
-      }
-      catch (e) {
-        message.channel.send("I don't have permissions to manage reactions. Ask the higher ups to grant me this AWESOME power so I can actually tell what you want.")
-      }
-      await message.react(r.emoji);
-      i = await onCollect(r.emoji, message, i, getList);
-    });
-    collector.on('end', collected => message.reactions.removeAll());
-  }
-  createCollectorMessage(msg, reactions);
-};
-
 client.on('message', async message => {
   if (message.author.bot || message.author.id === client.user.id) {
     return;
@@ -475,6 +437,9 @@ client.on('message', async message => {
       let fetched = await message.channel.messages.fetch({limit: Math.min(100, parseInt(numbers[0]) + 1)});
       message.channel.bulkDelete(fetched);
     }
+    if (message.content.includes('test')) {
+      createMessages(message, msg => msg.author.id === message.author.id, m => message.channel.send('recieved ' + m.content));
+    }
   }
   if (!message.content.startsWith(prefix) && !message.content.includes('<@!' + client.user.id + '>')) {
     return;
@@ -482,12 +447,12 @@ client.on('message', async message => {
   message.content = message.content.replace(new RegExp(prefix, 'g'), '').replace(new RegExp('<@!' + client.user.id + '>', 'g'), '');
   if (message.content.toLowerCase().includes('ping')) {
      const msg = await message.reply(`Pong`);
-     msg.edit(`Pong: ${msg.createdTimestamp - message.createdTimestamp}`);
+     msg.edit(`Pong: ${msg.createdTimestamp - message.createdTimestamp} ms.`);
      return;
   }
   if (message.content.toLowerCase().includes('pong')) {
      const msg = await message.reply(`Ping`);
-     msg.edit(`Ping: ${msg.createdTimestamp - message.createdTimestamp}`);
+     msg.edit(`Ping: ${msg.createdTimestamp - message.createdTimestamp} ms.`);
      return;
   }
   if (message.content.toLowerCase().includes('help') || !message.content.replace(/\s/g, '')) {
@@ -565,20 +530,10 @@ client.on('message', async message => {
   }
   if (message.content.toLowerCase().includes('suggest contest')) {
     await message.channel.send('What is the name of the contest? Use `c` to abort at any time. You have 15 seconds, starting ... now!');
-    const collector = message.channel.createMessageCollector(msg => msg.author.id === message.author.id, { max: 1, time: replyTime });
-    collector.on('collect', async m => {
-      if (m.content.toLowerCase() === 'c') {
-        message.channel.send('Aborted!');
-        return;
-      }
+    createMessages(message, msg => msg.author.id === message.author.id, async m => {
       const contest = m.content.trim();
       await message.channel.send('Alright, you want to add ' + contest + '. What\'s the link to the AoPS contest collection of all such problems?');
-      const collection = message.channel.createMessageCollector(msg => msg.author.id === message.author.id, { max: 1, time: replyTime });
-      collection.on('collect', async m => {
-        if (m.content.toLowerCase() === 'c') {
-          message.channel.send('Aborted!');
-          return;
-        }
+      createMessages(message, msg => msg.author.id === message.author.id, async m => {
         const link = m.content.trim();
         message.channel.send('You\'re sending ' + contest + ' with link ' + link + '.\n\n Are you sure you want to do this? React with 🇾 for yes and with 🇳otherwise.').then(msg => createReactions(message, ['🇾', '🇳'], [(msg, clicked, i) => {
           if (i !== 823698652948698347983475073498579837947) {
@@ -593,7 +548,7 @@ client.on('message', async message => {
           }
           return 823698652948698347983475073498579837947;
         }], msg));
-      })
+      });
     });
     return;
   }
