@@ -186,10 +186,10 @@ const supportedContests = [
   },
   {
     name: 'rmm-links',
-    displayName: 'Romainian Masters In Mathematics',
+    displayName: 'Romanian Masters In Mathematics',
     aliases: [
       'RMM',
-      'Romainian Masters In Mathematics',
+      'Romanian Masters In Mathematics',
     ],
     type: 'regular',
   },
@@ -277,6 +277,46 @@ const supportedContests = [
       'Brazil Math Olympiad'
     ],
     type: 'regular'
+  },
+  {
+    name: 'amc8-links',
+    displayName: 'AMC 8',
+    aliases: [
+      'AMC 8',
+    ],
+    type: 'regular'
+  },
+  {
+    name: 'amc10-links',
+    displayName: 'AMC 10',
+    aliases: [
+      'AMC 10',
+    ],
+    type: 'shortlist',
+    categories: [
+      'A',
+      'B',
+      'P'
+    ],
+    firstCategory: 1776,
+    maxChar: 1,
+    needsNumber: false
+  },
+  {
+    name: 'amc12-links',
+    displayName: 'AMC 12',
+    aliases: [
+      'AMC 12',
+    ],
+    type: 'shortlist',
+    categories: [
+      'A',
+      'B',
+      'P'
+    ],
+    firstCategory: 1776,
+    maxChar: 1,
+    needsNumber: false
   },
 ]
 
