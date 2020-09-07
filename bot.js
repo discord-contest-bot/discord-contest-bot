@@ -672,19 +672,19 @@ client.on('message', async message => {
     }
     return;
   }
-  if (message.content.toLowerCase().includes('latex')) {
-    message.content = message.content.replace(/latex/g, '');
-    const { problem } = await getProblemInfo(message);
-    if (!!problem) {
-      message.channel.send('```latex' + latexify(noAsy(problem.statement)) + '```');
-    }
-    return;
-  }
   if (message.content.toLowerCase().includes('debug latex')) {
     message.content = message.content.replace(/debug latex/g, '');
     const { problem } = await getProblemInfo(message);
     if (!!problem) {
-      message.channel.send('```latex' + makeLatex(noAsy(problem.statement)) + '```');
+      message.channel.send('```latex\n' + makeLatex(noAsy(problem.statement)) + '```');
+    }
+    return;
+  }
+  if (message.content.toLowerCase().includes('latex')) {
+    message.content = message.content.replace(/latex/g, '');
+    const { problem } = await getProblemInfo(message);
+    if (!!problem) {
+      message.channel.send('```latex\n' + latexify(noAsy(problem.statement)) + '```');
     }
     return;
   }
