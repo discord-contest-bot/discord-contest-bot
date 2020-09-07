@@ -399,6 +399,10 @@ const moderators = [
 firebase.initializeApp(firebaseConfig);
 
 client.on('ready', () => {
+
+  client.user.setActivity(`over ${client.guilds.cache.size} servers.`, { type: 'WATCHING' })
+    .then(presence => console.log(`Activity set to ${presence.activities[0].name}`))
+    .catch(console.error);
     console.log('I am ready!');
 });
 
@@ -509,7 +513,7 @@ client.on('message', async message => {
     }
     if (message.content.includes('server number')) {
       console.log(client.guilds.cache.size);
-      message.channel.send("Hello");
+      message.channel.send("I'm right now in " + client.guilds.cache.size + " servers!");
     }
   }
   if (!message.content.startsWith(prefix) && !message.content.includes('<@!' + client.user.id + '>')) {
