@@ -3,5 +3,11 @@ xkeyval
 preview
 asymptote
 etoolbox
-arcs
-relsize
+stackengine
+calc
+listofitems
+scalerel
+graphicx
+keyval
+graphics
+trig

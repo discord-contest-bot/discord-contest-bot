@@ -67,15 +67,17 @@ const makeLatex = str => {
   \\usepackage\{amsmath\}
   \\usepackage\{amsfonts\}
   \\usepackage\{amssymb\}
-  \\usepackage\{arcs\}
-  \\usepackage\{etoolbox\}
-  \\makeatletter
-    \\providecommand\\@gobblethree[3]{}
-    \\patchcmd{\\over@under@arc}
-    {\\@gobbletwo}
-    {\\@gobblethree}
-    {}{}
-  \\makeatother
+  \\usepackage\{scalerel\}
+  \\usepackage\{stackengine\}
+  \\usepackage\{scalerel\}
+  \\usepackage\{stackengine\}
+
+  \\newcommand\\overarc[1]{\\ThisStyle\{\%
+    \\setbox0=\\hbox\{\$\SavedStyle\#1\$\}\%
+    \\stackengine\{-.5\\LMpt}\{\$\\SavedStyle\#1\$\}\{\%
+      \\stretchto\{\\scaleto\{\\SavedStyle\\mkern.2mu\\frown\}\{.4\\wd0\}\}\{.5\\ht0\}\%
+    \}\{O\}\{c\}\{F\}\{T\}\{S\}\%
+  \}\}
   \\begin\{document\}
   \\thispagestyle{empty}
   \\noindent ${latexify(str)}
@@ -690,9 +692,9 @@ client.on('message', async message => {
   if (!result) return;
   const { problem, contest, year, problemNumber } = result;
   if (!!process.env.NO_RENDER) {
-    message.channel.send(makeLatex(noAsy(problem.statement))).then(msg => createReactions(message, ['💻', '🔗'], [(message, clicked, i) => {
+    message.channel.send('```latex' + makeLatex(noAsy(problem.statement)) + '```').then(msg => createReactions(message, ['💻', '🔗'], [(message, clicked, i) => {
       if (!clicked) {
-        message.edit(message.content + '\nLaTeX:```'+ latexify(noAsy(problem.statement)) + '```');
+        message.edit(message.content + '\nLaTeX:```latex'+ latexify(noAsy(problem.statement)) + '```');
         return 0;
       }
     }, (message, clicked, i) => {
