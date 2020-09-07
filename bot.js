@@ -24,7 +24,7 @@ const noAsy = str => {
 };
 
 const latexify = str => {
-  return str.replace(/\n\n/g, '\n').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/<i>/g, '\\textit\{').replace(/<\/i>|<\/b>/g, '\}').replace(/<b>/g, '\\textbf\{').replace(/<li[^>]*>/g, '\\item ').replace(/<\/li>/g, '').replace(/\n<ol[^>]*>/g, '\\begin{enumerate}').replace(/<\/ol>\n/g, '\\end{enumerate}').replace(/\n<ul[^>]*>/g, '\\begin{itemize}').replace(/<\/ul>\n/g, '\\end{itemize}').replace(/\n/g, '~\\\\').replace(/\&ge\;|\&gte\;/g, '\\ge').replace(/\&amp\;/g, '\\\&').replace(/\&nbsp;/g, '').replace(/<hr[^>]*>/g, '\\rule\{\\linewidth\}{0.5mm}').replace(/\&amp;[\s]*=/g, '&=').replace(/\~\\\\\\item/g, '\\item').replace(/\~\\\\\\end{itemize}/g, '\\end{itemize}');
+  return str.replace(/\n\n/g, '\n').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/<i>/g, '\\textit\{').replace(/<\/i>|<\/b>/g, '\}').replace(/<b>/g, '\\textbf\{').replace(/<li[^>]*>/g, '\\item ').replace(/<\/li>/g, '').replace(/\n<ol[^>]*>/g, '\\begin{enumerate}').replace(/<\/ol>\n/g, '\\end{enumerate}').replace(/\n<ul[^>]*>/g, '\\begin{itemize}').replace(/<\/ul>\n/g, '\\end{itemize}').replace(/\n/g, '~\\\\').replace(/\&ge\;|\&gte\;/g, '\\ge').replace(/\&amp\;/g, '\\\&').replace(/\&nbsp;/g, '').replace(/<hr[^>]*>/g, '\\rule\{\\linewidth\}{0.5mm}').replace(/\&amp;[\s]*=/g, '&=').replace(/\~\\\\\\item/g, '\\item').replace(/\~\\\\\\end{itemize}/g, '\\end{itemize}').replace(/\\\&=/g, '\&=');
 };
 
 const makeLatex = str => {
