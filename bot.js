@@ -67,17 +67,9 @@ const makeLatex = str => {
   \\usepackage\{amsmath\}
   \\usepackage\{amsfonts\}
   \\usepackage\{amssymb\}
-  \\usepackage\{scalerel\}
-  \\usepackage\{stackengine\}
-  \\usepackage\{scalerel\}
-  \\usepackage\{stackengine\}
-
-  \\newcommand\\overarc[1]{\\ThisStyle\{\%
-    \\setbox0=\\hbox\{\$\SavedStyle\#1\$\}\%
-    \\stackengine\{-.5\\LMpt}\{\$\\SavedStyle\#1\$\}\{\%
-      \\stretchto\{\\scaleto\{\\SavedStyle\\mkern.2mu\\frown\}\{.4\\wd0\}\}\{.5\\ht0\}\%
-    \}\{O\}\{c\}\{F\}\{T\}\{S\}\%
-  \}\}
+  \\DeclareSymbolFont\{yhlargesymbols\}\{OMX\}\{yhex\}\{m\}\{n\}
+  \\DeclareMathAccent\{\\wideparen\}\{\\mathord\}\{yhlargesymbols\}\{"F3\}
+  \\newcommand\\overarc[1]\{\\wideparen\{\#1\}\}
   \\begin\{document\}
   \\thispagestyle{empty}
   \\noindent ${latexify(str)}
