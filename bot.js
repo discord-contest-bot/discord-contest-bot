@@ -40,6 +40,7 @@ const replaceSubstring = (str, beginStr, toReplace, replacement, endStr) => {
 const latexify = str => {
   str = replaceSubstring(str, '\\begin\{align\*\}', '\&amp;', '\&', '\\end\{align\*\}');
   str = replaceSubstring(str, '\\begin\{cases\}', '\&amp;', '\&', '\\end\{cases\}');
+  str = replaceSubstring(str, '\\begin\{array\}', '\&amp;', '\&', '\\end\{array\}');
   let totalN = -1;
   for (let i = 0; i < str.length; i ++) {
     if (str[i] === '\n') {
