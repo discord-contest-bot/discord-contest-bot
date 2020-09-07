@@ -67,8 +67,7 @@ const makeLatex = str => {
   \\usepackage\{amsmath\}
   \\usepackage\{amsfonts\}
   \\usepackage\{amssymb\}
-  \\DeclareSymbolFont\{yhlargesymbols\}\{OMX\}\{yhex\}\{m\}\{n\}
-  \\DeclareMathAccent\{\\wideparen\}\{\\mathord\}\{yhlargesymbols\}\{"F3\}
+  \\usepackage\{yhmath\}
   \\newcommand\\overarc[1]\{\\wideparen\{\#1\}\}
   \\begin\{document\}
   \\thispagestyle{empty}
