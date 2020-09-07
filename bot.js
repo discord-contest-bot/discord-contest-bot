@@ -507,8 +507,9 @@ client.on('message', async message => {
       let fetched = await message.channel.messages.fetch({limit: Math.min(100, parseInt(numbers[0]) + 1)});
       message.channel.bulkDelete(fetched);
     }
-    if (message.content.includes('test')) {
-      createMessages(message, msg => msg.author.id === message.author.id, m => message.channel.send('recieved ' + m.content));
+    if (message.content.includes('server number')) {
+      console.log(client.guilds.cache.size);
+      message.channel.send("Hello");
     }
   }
   if (!message.content.startsWith(prefix) && !message.content.includes('<@!' + client.user.id + '>')) {
@@ -624,7 +625,7 @@ client.on('message', async message => {
   }
   if (message.content.toLowerCase().includes('link')) {
     message.content = message.content.replace(/link/g, '');
-    const problem = await getProblemInfo(message);
+    const { problem } = await getProblemInfo(message);
     if (!!problem) {
       message.channel.send(problem.link);
     }
@@ -632,7 +633,7 @@ client.on('message', async message => {
   }
   if (message.content.toLowerCase().includes('latex')) {
     message.content = message.content.replace(/link/g, '');
-    const problem = await getProblemInfo(message);
+    const { problem } = await getProblemInfo(message);
     if (!!problem) {
       message.channel.send('```' + latexify(noAsy(problem.statement)) + '```');
     }
