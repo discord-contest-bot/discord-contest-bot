@@ -2,3 +2,5 @@ standalone
 xkeyval
 preview
 asymptote
+etoolbox
+arcs
