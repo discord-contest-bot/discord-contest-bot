@@ -682,7 +682,9 @@ client.on('message', async message => {
           message.edit(message.content + '\nLink: ' + problem.link);
           return 0;
         }
-      }], msg, (reaction, user) => (['💻', '🔗'].includes(reaction.emoji.name) && !message.author.bot)));
+      }], msg, (reaction, user) => {
+        return (['💻', '🔗'].includes(reaction.emoji.name) && !message.author.bot && message.author.id !== client.user.id)}
+      ));
     });
   });
 });
