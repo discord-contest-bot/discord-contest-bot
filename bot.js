@@ -759,3 +759,9 @@ app.get("/invite", (req, res) => {
 app.get("/support", (req, res) => {
   res.send(`<meta http-equiv="Refresh" content="0; url='https://discord.gg/C2sYVGb'" />`)
 });
+
+app.get("/output", (req, res) => {
+  let data = fs.readFileSync('./output.pdf');
+  res.contentType('application/pdf');
+  res.send(data);
+})
