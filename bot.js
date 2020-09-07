@@ -647,7 +647,17 @@ client.on('message', async message => {
   if (!result) return;
   const { problem, contest, year, problemNumber } = result;
   if (!!process.env.NO_RENDER) {
-    message.channel.send(makeLatex(noAsy(problem.statement)));
+    message.channel.send(makeLatex(noAsy(problem.statement))).then(msg => createReactions(message, ['💻', '🔗'], [(message, clicked, i) => {
+      if (!clicked) {
+        message.edit(message.content + '\nLaTeX:```'+ latexify(noAsy(problem.statement)) + '```');
+        return 0;
+      }
+    }, (message, clicked, i) => {
+      if (!clicked) {
+        message.edit(message.content + '\nLink: ' + problem.link);
+        return 0;
+      }
+    }], msg, (reaction, user) => (['💻', '🔗'].includes(reaction.emoji.name) && !user.bot && user.id !== client.user.id)));
     return;
   }
   const msg = await message.channel.send('Fetched ' + contest.displayName + ' ' + year + ' ' + problemNumber + '. Now trying to render that.');
@@ -682,9 +692,7 @@ client.on('message', async message => {
           message.edit(message.content + '\nLink: ' + problem.link);
           return 0;
         }
-      }], msg, (reaction, user) => {
-        return (['💻', '🔗'].includes(reaction.emoji.name) && !message.author.bot && message.author.id !== client.user.id)}
-      ));
+      }], msg, (reaction, user) => (['💻', '🔗'].includes(reaction.emoji.name) && !user.bot && user.id !== client.user.id)));
     });
   });
 });
