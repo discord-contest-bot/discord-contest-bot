@@ -24,7 +24,7 @@ const noAsy = str => {
 };
 
 const latexify = str => {
-  return str.replace(/\n\n/g, '\n').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/<i>/g, '\\textit\{').replace(/<\/i>|<\/b>/g, '\}').replace(/<b>/g, '\\textbf\{').replace(/<li[^>]*>/g, '\\item ').replace(/<\/li>/g, '').replace(/\n<ol[^>]*>/g, '\\begin{enumerate}').replace(/<\/ol>\n/g, '\\end{enumerate}').replace(/\n<ul[^>]*>/g, '\\begin{itemize}').replace(/<\/ul>\n/g, '\\end{itemize}').replace(/\n/g, '~\\\\').replace(/\&ge\;|\&gte\;/g, '\\ge').replace(/\&amp\;/g, '\\\&').replace(/\&nbsp;/g, '').replace(/<hr[^>]*>/g, '\\rule\{\\linewidth\}{0.5mm}').replace(/\&amp;[\s]*=/g, '&=').replace(/\~\\\\\\item/g, '\\item').replace(/\~\\\\\\end{itemize}/g, '\\end{itemize}').replace(/\\\&=/g, '\&=');
+  return str.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/<i>/g, '\\textit\{').replace(/<\/i>|<\/b>/g, '\}').replace(/<b>/g, '\\textbf\{').replace(/<li[^>]*>/g, '\\item ').replace(/<\/li>/g, '').replace(/\n<ol[^>]*>/g, '\\begin{enumerate}').replace(/<\/ol>\n/g, '\\end{enumerate}').replace(/\n<ul[^>]*>/g, '\\begin{itemize}').replace(/<\/ul>\n/g, '\\end{itemize}').replace(/\n/g, '~\\\\').replace(/\&ge\;|\&gte\;/g, '\\ge').replace(/\&amp\;/g, '\\\&').replace(/\&nbsp;/g, '').replace(/<hr[^>]*>/g, '\\rule\{\\linewidth\}{0.5mm}').replace(/\~\\\\\\item/g, '\\item').replace(/\~\\\\\\end{itemize}/g, '\\end{itemize}').replace(/\\\&=/g, '\&=').replace(/\\\\\[/g, '\\\\~\[');
 };
 
 const makeLatex = str => {
@@ -542,8 +542,8 @@ client.on('message', async message => {
     		{ name: 'Help Command', value: 'You can use `[prefix] help` to get my attention.' },
         { name: 'Prefix', value: 'The current prefixes are \`' + prefix + '\`, but a mention works perfectly fine (<@746943730510200893>).'},
         { name: 'Contests', value: 'I have many contests available. Use `[prefix] contests` to see them all.'},
-        { name: 'Report a Bug', value: 'Use \`' + prefix + ' bug reports [content]\` to report a bug!'},
-        { name: 'Suggest a Contest', value: 'Use \`' + prefix + ' suggest contest\` to start the contest suggestion helper!'},
+        { name: 'Report a Bug', value: 'Use \`' + prefix + 'bug report [content]\` to report a bug!'},
+        { name: 'Suggest a Contest', value: 'Use \`' + prefix + 'suggest contest\` to start the contest suggestion helper!'},
         { name: 'Support server', value: '[Join Us Here](https://discord.gg/C2sYVGb)'},
         { name: 'Invite Me', value: '[Invite Contest Bot to Your Server](https://discord.com/api/oauth2/authorize?client_id=746943730510200893&permissions=100416&scope=bot)'},
     	)
