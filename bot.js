@@ -23,8 +23,40 @@ const noAsy = str => {
   return str;
 };
 
+const replaceSubstring = (str, beginStr, toReplace, replacement, endStr) => {
+  let begin = 0;
+  for (let i = 0; i < str.length; i ++) {
+    if (str.substr(i, beginStr.length) === beginStr) {
+      begin = i;
+      continue;
+    }
+    if (str.substr(i, endStr.length) === endStr) {
+      str = str.substring(0, begin) + str.substring(begin, i).replace(/\&amp;/g, '\&') + str.substring(i);
+    }
+  }
+  return str;
+};
+
 const latexify = str => {
-  return str.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/<i>/g, '\\textit\{').replace(/<\/i>|<\/b>/g, '\}').replace(/<b>/g, '\\textbf\{').replace(/<li[^>]*>/g, '\\item ').replace(/<\/li>/g, '').replace(/\n<ol[^>]*>/g, '\\begin{enumerate}').replace(/<\/ol>\n/g, '\\end{enumerate}').replace(/\n<ul[^>]*>/g, '\\begin{itemize}').replace(/<\/ul>\n/g, '\\end{itemize}').replace(/\n/g, '~\\\\').replace(/\&ge\;|\&gte\;/g, '\\ge').replace(/\&amp\;/g, '\\\&').replace(/\&nbsp;/g, '').replace(/<hr[^>]*>/g, '\\rule\{\\linewidth\}{0.5mm}').replace(/\~\\\\\\item/g, '\\item').replace(/\~\\\\\\end{itemize}/g, '\\end{itemize}').replace(/\\\&=/g, '\&=').replace(/~\\\\\[/g, '\\\\~\[');
+  str = replaceSubstring(str, '\\begin\{align\*\}', '\&amp;', '\&', '\\end\{align\*\}');
+  let totalN = -1;
+  for (let i = 0; i < str.length; i ++) {
+    if (str[i] === '\n') {
+      totalN ++;
+      continue;
+    }
+    if (totalN >= 0) {
+      str = str.substring(0, i - totalN - 1) + `\\\\[${totalN}\\baselineskip]` + str.substring(i);
+      totalN = -1;
+    }
+  }
+  return str.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/<i>/g, '\\textit\{').replace(/<\/i>|<\/b>/g, '\}').replace(/<b>/g, '\\textbf\{')    //Replace <, >, \textit, \textbf
+    .replace(/<li[^>]*>/g, '\\item ').replace(/<\/li>/g, '').replace(/<ol[^>]*>/g, '\\begin{enumerate}').replace(/<\/ol>/g, '\\end{enumerate}')       //Replace \item, \begin{enumerate}
+    .replace(/<ul[^>]*>/g, '\\begin{itemize}').replace(/<\/ul>/g, '\\end{itemize}').replace(/\&ge\;|\&gte\;/g, '\\ge').replace(/\&amp\;/g, '\\\&')    //Replace \end{itemize}, \geq, \&
+    .replace(/\&nbsp;/g, '').replace(/<hr[^>]*>/g, '\\rule\{\\linewidth\}{0.5mm}')                                                                    //Replace all &nbsp;, <hr />
+    .replace(/\\\\\[[\d]*\\baselineskip\]\\item/g, '\\item').replace(/\\item\\\\\[[\d]*\\baselineskip\]/g, '\\item')                                  //Replace newlines around \item
+    .replace(/\\\\\[[\d]*\\baselineskip\]\\begin\{/g, '\\begin\{').replace(/\\begin\{([^}]*)\}\\\\\[[\d]*\\baselineskip\]/g, '\\begin\{$1\}')         //Replace newlines around \begin{environment}
+    .replace(/\\\\\[[\d]*\\baselineskip\]\\end\{/g, '\\end\{').replace(/\\end\{([^}]*)\}\\\\\[[\d]*\\baselineskip\]/g, '\\end\{$1\}');                //Replace newlines around \end{environment}
 };
 
 const makeLatex = str => {
