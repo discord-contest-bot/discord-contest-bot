@@ -67,6 +67,15 @@ const makeLatex = str => {
   \\usepackage\{amsmath\}
   \\usepackage\{amsfonts\}
   \\usepackage\{amssymb\}
+  \\usepackage\{arcs\}
+  \\usepackage\{etoolbox\}
+  \\makeatletter
+    \\providecommand\\@gobblethree[3]{}
+    \\patchcmd{\\over@under@arc}
+    {\\@gobbletwo}
+    {\\@gobblethree}
+    {}{}
+  \\makeatother
   \\begin\{document\}
   \\thispagestyle{empty}
   \\noindent ${latexify(str)}
