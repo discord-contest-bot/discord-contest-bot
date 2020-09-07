@@ -1,7 +1,7 @@
 const reactTime = 60000;
 const replyTime = 15000;
 
-const createReactions = async (message, reactions, functions, msg) => {
+const createReactions = async (message, reactions, functions, msg, fill) => {
   await reactions.forEach(async r => {
     await msg.react(r);
   });
@@ -21,7 +21,7 @@ const createReactions = async (message, reactions, functions, msg) => {
   }
   const createCollectorMessage = async (message, getList) => {
     let i = 0;
-    const collector = message.createReactionCollector(filter, { time: reactTime });
+    const collector = message.createReactionCollector(fill || filter, { time: reactTime });
     await collector.on('collect', async (r, user) => {
       try {
         await r.users.remove(user.id);
