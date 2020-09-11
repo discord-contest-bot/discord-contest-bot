@@ -465,61 +465,95 @@ const getProblemInfo = async message => {
       continue;
     }
     message.content = deepReplace(contest.aliases, message.content);
+    const contestInfo = await firebase.database().ref().child(contest.name).once('value');
     const numbers = message.content.match(/\d+/g);
+    let year;
     if (!numbers) {
-      message.channel.send("I can't return the entire contest - that's crazy. Maybe a year would shorten stuff a lot.");
+      year = Object.keys(contestInfo.val())[Math.floor(Math.random() * Object.keys(contestInfo.val()).length)];
+      console.log(year);
       return;
     }
-    const year = numbers[0];
-    if (!numbers[1]) {
-      message.channel.send("From what I see, you probably provided a year but I still need a problem number, right? It would help if I had one.");
-      return;
+    else {
+      year = numbers[0];
     }
+    let noProblem = false;
     let problemNumber = numbers[1];
+    let noTopic = false;
     if (contest.type === 'shortlist') {
       if (parseInt(year) >= contest.firstCategory && !(contest.needsNumber && parseInt(year) <= contest.lastNeeded )) {
-        const letters = message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)).match(/[a-zA-Z]+/g);
-        if (!letters) {
-          message.channel.send("Don't delay me like this. Where's the topic?")
-          return;
+        if (!numbers[1]) {
+          noProblem = true;
         }
-        if (contest.picky && message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)).includes(contest.keyword.toLowerCase())) {
+        const letters = !noProblem ? message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)).match(/[a-zA-Z]+/g) : message.content.substring(message.content.indexOf(numbers[0])).match(/[a-zA-Z]+/g);
+        if (!letters) {
+          noTopic = true;
+        }
+        else if (contest.picky && (!noProblem ? message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)) : message.content.substring(message.content.indexOf(numbers[0]))).includes(contest.keyword.toLowerCase())) {
           if (!letters[1]) {
             message.channel.send("Specifications say I need something more specific, like November GENERAL (for HMMT). Provide that please");
+            noTopic = true;
           }
-          problemNumber = (letters[0].substring(0, contest.maxChar) + letters[1].substring(0, contest.maxChar) + '/' + numbers[1]).toUpperCase();
+          else {
+            problemNumber = !noProblem ? (letters[0].substring(0, contest.maxChar) + letters[1].substring(0, contest.maxChar) + '/' + numbers[1]).toUpperCase() : (letters[0].substring(0, contest.maxChar) + letters[1].substring(0, contest.maxChar)).toUpperCase();
+          }
         }
         else {
-          problemNumber = (letters[0].substring(0, contest.maxChar) + '/' + numbers[1]).toUpperCase();
+          problemNumber = !noProblem ? (letters[0].substring(0, contest.maxChar) + '/' + numbers[1]).toUpperCase() : (letters[0].substring(0, contest.maxChar)).toUpperCase();
         }
       }
       if (contest.needsNumber && parseInt(year) <= contest.lastNeeded) {
-        if (!numbers[2]) {
-          message.channel.send("I didn't get a problem number - why is that?");
-          return;
-        }
-        const letters = message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[2], message.content.indexOf(numbers[0]) + numbers[0].length)).match(/[a-zA-Z]+/g);
-        if (!letters && parseInt(year) >= contest.firstCategory) {
-          message.channel.send("Don't delay me like this. Where's the topic?")
-          return;
-        }
-        if (contest.picky && message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)).includes(contest.keyword.toLowerCase())) {
-          if (!letters[1]) {
-            message.channel.send("Specifications say I need something more specific, like November GENERAL (for HMMT). Provide that please");
-          }
-          problemNumber = (letters[0].substring(0, contest.maxChar) + letters[1].substring(0, contest.maxChar) + numbers[1] + '/' + numbers[1]).toUpperCase();
+        if (!numbers[1]) {
+          noTopic = true;
         }
         else {
-          problemNumber = (letters[0].substring(0, contest.maxChar) + numbers[1] + '/' + numbers[2]).toUpperCase();
+          if (!numbers[2]) {
+            noProblem = true;
+          }
+          const letters = !noProblem ? message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[2], message.content.indexOf(numbers[0]) + numbers[0].length)).match(/[a-zA-Z]+/g) : message.content.substring(message.content.indexOf(numbers[0])).match(/[a-zA-Z]+/g);
+          if (!letters && parseInt(year) >= contest.firstCategory) {
+            noTopic = true;
+          }
+          else if (contest.picky && (!noProblem ? message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[2], message.content.indexOf(numbers[0]) + numbers[0].length)) : message.content.substring(message.content.indexOf(numbers[0]))).includes(contest.keyword.toLowerCase())) {
+            if (!letters[1]) {
+              message.channel.send("Specifications say I need something more specific, like November GENERAL (for HMMT). Provide that please");
+            }
+            else {
+              problemNumber = !noProblem ? (letters[0].substring(0, contest.maxChar) + letters[1].substring(0, contest.maxChar) + numbers[1] + '/' + numbers[2]).toUpperCase() : (letters[0].substring(0, contest.maxChar) + letters[1].substring(0, contest.maxChar) + numbers[1]).toUpperCase();
+            }
+          }
+          else {
+            problemNumber = !noProblem ? (letters[0].substring(0, contest.maxChar) + numbers[1] + '/' + numbers[2]).toUpperCase() : (letters[0].substring(0, contest.maxChar) + numbers[1]).toUpperCase();
+          }
         }
       }
     }
+    if (noTopic) {
+      if (!contestInfo.val()[year]) {
+        message.channel.send("I couldn't find that year!");
+        return;
+      }
+      let topics = Object.keys(contestInfo.val()[year]);
+      topics.splice(topics.indexOf('link'), 1);
+      const topic = topics[Math.floor(Math.random() * topics.length)];
+      problemNumber = topic + '/' + Object.keys(contestInfo.val()[year][topic])[Math.floor(Math.random() * Object.keys(contestInfo.val()[year][topic]).length)];
+    }
+    else if (noProblem) {
+      if (!contestInfo.val()[year][problemNumber]) {
+        message.channel.send("I couldn't find that topic!");
+        console.log(problemNumber);
+        console.log(contestInfo.val()[year]);
+        return;
+      }
+      problemNumber += '/' + Object.keys(contestInfo.val()[year][problemNumber])[Math.floor(Math.random() * Object.keys(contestInfo.val()[year][problemNumber]).length)];
+    }
+    console.log(problemNumber);
     const preliminaryProblem = await firebase.database().ref().child(contest.name).child(year).child(problemNumber).once('value');
     const problem = preliminaryProblem.val();
     if (!problem) {
       message.channel.send("Whoops, looks like I couldn't find that problem. Try again with a **valid** problem.")
       return;
     }
+    console.log({ problem, contest, year, problemNumber })
     return { problem, contest, year, problemNumber };
   }
 };
