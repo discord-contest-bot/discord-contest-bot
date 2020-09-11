@@ -264,7 +264,7 @@ const supportedContests = [
     name: 'balkanmo-links',
     displayName: 'Balkan Mathematical Olympiad',
     aliases: [
-      'BMO',
+      'Balkan MO',
       'Balkan Mathematical Olympiad',
     ],
     type: 'regular',
@@ -368,12 +368,12 @@ const supportedContests = [
   },
   {
     name: 'philippine-links',
-    displayName: 'Philipine Math Olympiad',
+    displayName: 'Philippine Math Olympiad',
     aliases: [
-      'Philipine Math Olympiad',
-      'Philipine MO',
-      'Philipine National Olympiad',
-      'Philipine',
+      'Philippine Math Olympiad',
+      'Philippine MO',
+      'Philippine National Olympiad',
+      'Philippine',
     ],
     type: 'regular'
   },
