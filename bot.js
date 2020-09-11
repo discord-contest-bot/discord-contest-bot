@@ -58,7 +58,8 @@ const latexify = str => {
     .replace(/\&nbsp;/g, '').replace(/<hr[^>]*>/g, '\\rule\{\\linewidth\}{0.5mm}')                                                                    //Replace all &nbsp;, <hr />
     .replace(/\\\\\[[\d]*\\baselineskip\]\\item/g, '\\item').replace(/\\item\\\\\[[\d]*\\baselineskip\]/g, '\\item')                                  //Replace newlines around \item
     .replace(/\\\\\[[\d]*\\baselineskip\]\\begin\{/g, '\\begin\{').replace(/\\begin\{([^}]*)\}\\\\\[[\d]*\\baselineskip\]/g, '\\begin\{$1\}')         //Replace newlines around \begin{environment}
-    .replace(/\\\\\[[\d]*\\baselineskip\]\\end\{/g, '\\end\{').replace(/\\end\{([^}]*)\}\\\\\[[\d]*\\baselineskip\]/g, '\\end\{$1\}');                //Replace newlines around \end{environment}
+    .replace(/\\\\\[[\d]*\\baselineskip\]\\end\{/g, '\\end\{').replace(/\\end\{([^}]*)\}\\\\\[[\d]*\\baselineskip\]/g, '\\end\{$1\}')                 //Replace newlines around \end{environment}
+    .replace(/\$([\d]+)(\.)*([\d]*)(\s)([a-zA-Z])/g, '\\\$$$1$2$3$4$5').replace(/−/g, '-');                                                           //Replace in the form $[number with or without decimal][space][letter] with \$[number with or without decimal][space][letter], and U+2212 with -
 };
 
 const makeLatex = str => {
@@ -76,6 +77,17 @@ const makeLatex = str => {
   `
 }
 
+/*
+  Explanation of what proceeds:
+    * Name is the name of the contest in the database
+    * Display name is the front name and the one that is shown
+    * Aliases are what the bot listens to
+    * The type is regular or shortlist, and regular = only problem, shortlist = category + problem
+    * firstCategory = first year contest has Shortlist
+    * maxChar = maximum number of characters that you need for category
+    * needsNumber = if you need a number (General Part 2 or TST 3)
+    * picky = if you have one keywork look for another (November Guts or November General)
+*/
 const supportedContests = [
   {
     name: 'isl-links',
@@ -719,6 +731,7 @@ client.on('message', async message => {
   if (!!process.env.NO_RENDER) {
     message.channel.send('```latex' + makeLatex(noAsy(problem.statement)) + '```').then(msg => createReactions(message, ['💻', '🔗'], [(message, clicked, i) => {
       if (!clicked) {
+        console.log(latexify(noAsy(problem.statement)));
         message.edit(message.content + '\nLaTeX:```latex'+ latexify(noAsy(problem.statement)) + '```');
         return 0;
       }
@@ -769,12 +782,14 @@ client.on('message', async message => {
 
 client.login(process.env.BOT_TOKEN);
 
+app.use(express.static('website'))
+
 app.listen(port, () => {
   console.log(`Listening to requests on http://localhost:${port}`);
 });
 
 app.get("/", (req, res) => {
-  res.send(`I'm contest bot! More information soon to come about me!`)
+  res.sendFile(path.join(__dirname + '/website/index.html'));
 });
 
 app.get("/invite", (req, res) => {
