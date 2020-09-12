@@ -458,7 +458,7 @@ const min = (number1, number2) => {
   return (number1 > number2) ? number2 : number1;
 };
 
-const getProblemInfo = async message => {
+const getProblemInfo = async (message, link) => {
   for (let i = 0; i < supportedContests.length; i ++) {
     let contest = supportedContests[i];
     if (!checkInclude(contest.aliases, message.content)) {
@@ -481,6 +481,10 @@ const getProblemInfo = async message => {
         message.channel.send("That's not a valid year!");
         return;
       }
+    }
+    if (noProblem || !numbers || !numbers[1]) {
+      console.log(contestInfo.val()[year]['link']);
+      return { problem: { link: contestInfo.val()[year]['link'] }};
     }
     let problemNumber = !noProblem ? numbers[1] : 0;
     if (contest.type === 'shortlist' && !noTopic) {
@@ -744,7 +748,7 @@ client.on('message', async message => {
   }
   if (message.content.toLowerCase().includes('link')) {
     message.content = message.content.replace(/link/g, '');
-    const { problem } = await getProblemInfo(message);
+    const { problem } = await getProblemInfo(message, true);
     if (!!problem) {
       message.channel.send(problem.link);
     }
