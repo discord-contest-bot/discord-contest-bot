@@ -556,14 +556,12 @@ const getProblemInfo = async message => {
         problemNumber = Object.keys(contestInfo.val()[year])[Math.floor(Math.random() * Object.keys(contestInfo.val()[year]).length)];
       }
     }
-    console.log(problemNumber);
     const preliminaryProblem = await firebase.database().ref().child(contest.name).child(year).child(problemNumber).once('value');
     const problem = preliminaryProblem.val();
     if (!problem) {
       message.channel.send("Whoops, looks like I couldn't find that problem. Try again with a **valid** problem.")
       return;
     }
-    console.log({ problem, contest, year, problemNumber })
     return { problem, contest, year, problemNumber };
   }
 };
@@ -604,7 +602,6 @@ client.on('message', async message => {
       message.channel.bulkDelete(fetched);
     }
     if (message.content.includes('server number')) {
-      console.log(client.guilds.cache.size);
       message.channel.send("I'm right now in " + client.guilds.cache.size + " servers!");
     }
   }
@@ -775,7 +772,6 @@ client.on('message', async message => {
   if (!!process.env.NO_RENDER) {
     message.channel.send('```latex' + makeLatex(noAsy(problem.statement)) + '```').then(msg => createReactions(message, ['💻', '🔗'], [(message, clicked, i) => {
       if (!clicked) {
-        console.log(latexify(noAsy(problem.statement)));
         message.edit(message.content + '\nLaTeX:```latex'+ latexify(noAsy(problem.statement)) + '```');
         return 0;
       }
