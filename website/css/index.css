@@ -1,0 +1,37 @@
+.content-wrapper {
+  font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+  max-width: 80vw;
+  margin: auto;
+}
+
+.image-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+h1 {
+  font-size: 68px;
+}
+
+h2 {
+  font-size: 52px;
+  color: blue;
+}
+
+h3 {
+  font-size: 40px;
+}
+
+h4 {
+  font-size: 32px;
+}
+
+h5 {
+  font-size: 21px;
+}
+
+h6 {
+  font-size: 14px;
+}
