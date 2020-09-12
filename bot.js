@@ -468,30 +468,36 @@ const getProblemInfo = async message => {
     const contestInfo = await firebase.database().ref().child(contest.name).once('value');
     const numbers = message.content.match(/\d+/g);
     let year;
+    let noTopic = false;
+    let noProblem = false;
     if (!numbers) {
       year = Object.keys(contestInfo.val())[Math.floor(Math.random() * Object.keys(contestInfo.val()).length)];
-      console.log(year);
-      return;
+      noTopic = true;
+      noProblem = true;
     }
     else {
       year = numbers[0];
+      if (!Object.keys(contestInfo.val()).includes(year)) {
+        message.channel.send("That's not a valid year!");
+        return;
+      }
     }
-    let noProblem = false;
-    let problemNumber = numbers[1];
-    let noTopic = false;
-    if (contest.type === 'shortlist') {
+    let problemNumber = !noProblem ? numbers[1] : 0;
+    if (contest.type === 'shortlist' && !noTopic) {
       if (parseInt(year) >= contest.firstCategory && !(contest.needsNumber && parseInt(year) <= contest.lastNeeded )) {
-        if (!numbers[1]) {
+        if (!numbers || !numbers[1]) {
           noProblem = true;
         }
         const letters = !noProblem ? message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)).match(/[a-zA-Z]+/g) : message.content.substring(message.content.indexOf(numbers[0])).match(/[a-zA-Z]+/g);
         if (!letters) {
           noTopic = true;
+          noProblem = true;
         }
         else if (contest.picky && (!noProblem ? message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)) : message.content.substring(message.content.indexOf(numbers[0]))).includes(contest.keyword.toLowerCase())) {
           if (!letters[1]) {
             message.channel.send("Specifications say I need something more specific, like November GENERAL (for HMMT). Provide that please");
             noTopic = true;
+            noProblem = true;
           }
           else {
             problemNumber = !noProblem ? (letters[0].substring(0, contest.maxChar) + letters[1].substring(0, contest.maxChar) + '/' + numbers[1]).toUpperCase() : (letters[0].substring(0, contest.maxChar) + letters[1].substring(0, contest.maxChar)).toUpperCase();
@@ -502,8 +508,9 @@ const getProblemInfo = async message => {
         }
       }
       if (contest.needsNumber && parseInt(year) <= contest.lastNeeded) {
-        if (!numbers[1]) {
+        if (!numbers || !numbers[1]) {
           noTopic = true;
+          noProblem = true;
         }
         else {
           if (!numbers[2]) {
@@ -527,7 +534,7 @@ const getProblemInfo = async message => {
         }
       }
     }
-    if (noTopic) {
+    if (noTopic && contest.type === 'shortlist' && parseInt(year) >= contest.firstCategory) {
       if (!contestInfo.val()[year]) {
         message.channel.send("I couldn't find that year!");
         return;
@@ -538,13 +545,16 @@ const getProblemInfo = async message => {
       problemNumber = topic + '/' + Object.keys(contestInfo.val()[year][topic])[Math.floor(Math.random() * Object.keys(contestInfo.val()[year][topic]).length)];
     }
     else if (noProblem) {
-      if (!contestInfo.val()[year][problemNumber]) {
-        message.channel.send("I couldn't find that topic!");
-        console.log(problemNumber);
-        console.log(contestInfo.val()[year]);
-        return;
+      if (problemNumber) {
+        if (!contestInfo.val()[year][problemNumber]) {
+          message.channel.send("I couldn't find that topic!");
+          return;
+        }
+        problemNumber += '/' + Object.keys(contestInfo.val()[year][problemNumber])[Math.floor(Math.random() * Object.keys(contestInfo.val()[year][problemNumber]).length)];
       }
-      problemNumber += '/' + Object.keys(contestInfo.val()[year][problemNumber])[Math.floor(Math.random() * Object.keys(contestInfo.val()[year][problemNumber]).length)];
+      else {
+        problemNumber = Object.keys(contestInfo.val()[year])[Math.floor(Math.random() * Object.keys(contestInfo.val()[year]).length)];
+      }
     }
     console.log(problemNumber);
     const preliminaryProblem = await firebase.database().ref().child(contest.name).child(year).child(problemNumber).once('value');
