@@ -489,7 +489,7 @@ const getProblemInfo = async (message, link) => {
       }
     }
     let problemNumber = !noProblem ? numbers[1] : 0;
-    if (!numbers[1] || !numbers) {
+    if (!numbers || !numbers[1]) {
       noProblem = true;
     }
     if (contest.type === 'shortlist' && !noTopic) {
