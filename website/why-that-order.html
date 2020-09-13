@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Discord Contest Bot</title>
+    <link rel="stylesheet" href="css/index.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+      document.addEventListener('copy', (event) => {
+        event.clipboardData.setData('text', (document.getSelection() + '').replace(/@Contest Bot/g, '@Contest Bot#7095'));
+        event.preventDefault();
+      });
+      const mentions = [{
+        actual: '#why-that-order__mention-contest-bot-7905',
+        hoverable: '#why-that-order__for__mention-contest-bot-7905',
+        size: 16
+      }];
+      mentions.forEach((mention, index) => {
+        $(document).ready(function() {
+          $(mention.actual).hover(function() {
+            $(mention.hoverable).css('display', 'inline-block');
+            $(mention.hoverable).html(`<div class="tooltip-mention" style="font-size: ` + mention.size + `px">
+              <img style=" border-radius: 50%; vertical-align: top; margin-right: 8px;" src="https://cdn.discordapp.com/avatars/746943730510200893/f7b072da2ae15e9a02ded70b02c557bf.png?size=128" alt=" " width="` + mention.size + `px" height="` + mention.size + `px">
+              Contest Bot<span class="dimmer">#7095</span>
+            </div>`);
+            $(mention.hoverable).css('top', $(mention.actual).offset().top - $(mention.hoverable).height() - 5);
+            $(mention.hoverable).css('left', $(mention.actual).offset().left + $(mention.actual).width() / 2 - $(mention.hoverable).width() / 2);
+          }, function() {
+            $(mention.hoverable).css('display', 'none');
+            $(mention.hoverable).html('');
+          });
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div class="content-wrapper">
+      <h2 class="md-header">How does Contest Bot get what you want?</h2>
+      <p>
+        Let's say that instead of saying the simple command <code class="md-code">gimme 2002 ISL N3</code>, you decided to make it harder on contest bot as such:<br /><br />
+        <div id="why-that-order__example-terse-statement" class="md-code-block">
+          <span id="why-that-order__mention-contest-bot-7905" class="mention" aria-label="Contest Bot#7095" role="button" style="position: relative;">@Contest Bot</span>, I was wondering if you could give me some of the ISL. In particular, I was looking at 2002 N3. Could you render that?
+        </div>
+      </p>
+      <div id="why-that-order__for__mention-contest-bot-7905" style="position: absolute; display: none; top: -100%;"></div>
+      <p>
+        Now, if you wait for a bit, Contest Bot will reply:
+      </p>
+      <div class="md-code-block">
+        Fetched IMO Shortlist 2002 N/3. Now trying to render that.
+      </div>
+      <p>
+        And soon enough, you'll get the following:<br />
+      </p>
+      <div class="md-code-block">
+        Here's IMO Shortlist 2002 N/3<br />
+        <img src="2002isln3.png"/><br />
+        <div class="emoji-wrapper">
+          <img src="https://discordapp.com/assets/509dd485f6269e2521955120f3e8f0ef.svg" style="vertical-align: text-top" height="16px" width="16px" />
+          1
+        </div>
+        <div class="emoji-wrapper">
+          <img src="https://discordapp.com/assets/7c13aa0def6ccb6932f47dedd33f59c1.svg" style="vertical-align: middle" height="16px" width="16px" />
+          1
+        </div>
+      </div>
+      Surprisingly, it understood! Let's see what it saw, and what it understood:
+      <div style="position: relative;">
+        <div class="why-that-order__slideshow">
+          <div class="md-code-block cutoff-text" style="font-size: 30px;">
+            <span id="why-that-order__mention-contest-bot-7905-slideshow" class="mention hover-underline" aria-label="Contest Bot#7095" role="button" style="position: relative;">@Contest Bot</span>, I was wondering if you could give me some of the ISL.
+          </div>
+          <div class="md-code-explain">
+            &hellip;That's a trigger - when you ping the bot, it starts listening. I mean, if I pinged you, you would be listening, right?
+          </div>
+        </div>
+        <div class="why-that-order__slideshow">
+          <div class="md-code-block cutoff-text" style="font-size: 30px;">
+            &hellip;some of the <span class="hover-underline">ISL</span>. In particular, I was looking at 2002 N3. Could you render that?
+          </div>
+          <div class="md-code-explain">
+            The word <code class="md-code">ISL</code> is a trigger to tell the bot to return an ISL (IMO Shortlist) problem. Now, we just need the year, category (A, C, G, N), and problem number.
+          </div>
+        </div>
+        <div class="why-that-order__slideshow">
+          <div class="md-code-block cutoff-text left-cutoff" style="font-size: 30px;">
+            of the ISL. In particular, I was looking at <span class="hover-underline">2002</span> N3. Could&hellip;
+          </div>
+          <div class="md-code-explain">
+            The bot searches for the first number (if it can't find a number, it'll by default provide a random problem). This is the year of the contest.
+          </div>
+        </div>
+        <div class="why-that-order__slideshow">
+          <div class="md-code-block cutoff-text left-cutoff" style="font-size: 30px;">
+            of the ISL. In particular, I was looking at 2002 N<span class="hover-underline">3</span>. Could&hellip;
+          </div>
+          <div class="md-code-explain">
+            Next, the bot searches for the problem number. If this is not there, it searches from the topic starting from the topic (2002).
+          </div>
+        </div>
+        <div class="why-that-order__slideshow">
+          <div class="md-code-block cutoff-text left-cutoff" style="font-size: 30px;">
+            of the ISL. In particular, I was looking at 2002 <span class="hover-underline">N</span>3. Could&hellip;
+          </div>
+          <div class="md-code-explain">
+            Finally, the bot solely looks at the string between the given numbers - 2002 and 3, in this case. Thus, you <b>must</b> put the topic in between these two.
+          </div>
+        </div>
+
+        <button class="left-0 slideshow-button" onclick="plusDivs(-1)">&#10094;</button>
+        <button class="right-0 slideshow-button" onclick="plusDivs(1)">&#10095;</button>
+      </div>
+      <p>
+        In the future, there may be further optimizations to this method, in which we can detect stuff like <code>AMC 10A 2020 4</code>. However, for now, put the contest in between the year and problem number (for example, use <code>2020 AMC 10A 4</code>).
+      </p>
+      <hr />
+      <p>Copyright © Discord Contest Bot Team, 2020</p>
+      <script>
+        var slideIndex = 1;
+        showDivs(slideIndex);
+
+        function plusDivs(n) {
+          showDivs(slideIndex += n);
+        }
+
+        function showDivs(n) {
+          var i;
+          var x = document.getElementsByClassName("why-that-order__slideshow");
+          if (n > x.length) {slideIndex = 1}
+          if (n < 1) {slideIndex = x.length}
+          for (i = 0; i < x.length; i++) {
+            x[i].style.display = "none";
+          }
+          x[slideIndex-1].style.display = "block";
+        }
+      </script>
+    </div>
+  </body>
+</html>

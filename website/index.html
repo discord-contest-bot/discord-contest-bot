@@ -9,11 +9,53 @@
       <div class="image-wrapper">
         <img src="logo.png" style="max-height: 90vh"/>
       </div>
-      <h1>Discord Contest Bot</h1>
-      <h2>What is Contest Bot?</h2>
-      <div>
-
-        </div>
+      <h2 class="md-header">What is Contest Bot?</h2>
+      <p>Contest Bot is a Discord Bot dedicated to making math competition problems easily accessible and encourage collaboration between avid mathematicians. It was created and is being developed by <a href="https://github.com/discord-contest-bot/">our team</a>. Check out the <a href="https://github.com/discord-contest-bot/discord-contest-bot">Contest Bot GitHub repository!</a></p>
+      <h2 class="md-header">What can Contest Bot do?</h2><p>Contest Bot is truly one of the best resources a math competitor can have in their discord server. It can:</p>
+        <ul>
+          <li>Give you images rendered from LaTeX from almost any math competition you can think of,</li>
+          <li>Provide you with the AoPS thread for the problem, and even</li><li>Provide the raw LaTeX code for the problem for your own requirements.</li>
+        </ul>
+      <p>If a contest is not supported by Contest Bot, you can use the <code class="md-code">suggest contest</code> command, or simply join our <a href="https://discord.gg/C2sYVGb">support server</a> and we will add it for you <strong><em>instantly!</em></strong></p>
+      <h2 class="md-header">How can I use Contest Bot?</h2>
+      <p>It's really simple! All you need to do is invite Contest Bot to a discord server by clicking on <a href="/invite">this link!</a> Note these are the minimal permissions contest bot needs to run. Of course, you can add it as an administrator, but that is up to you!</p>
+      <h2 class="md-header">Getting problems</h2>
+      <p>The central aspect of this bot is getting problems. You can do this with the command <code class="md-code">[prefix]</code> followed by the competition name or alias, year, and problem number. If there are additional arguments (for example, HMMT subject tests and ISL subject categories) then they go in between the year and problem number. For example, if I wanted the 5th problem of the 2020 Harvard-MIT Math Tournament Algebra subject test, I could write <code class="md-code">[prefix] 2020 HMMT Algebra 5.</code></p>
+      <p>Some finer points:</p>
+        <ul>
+          <li>To randomize the problem number, year, or subject, do not specify.</li>
+          <li>For abbreviations of subject categories, if using one letter doesn't work, use two letters to see if it works.</li>
+        </ul>
+      <p>In general, it is a developer suggestion that you put the information in the following order: <code class="md-code">[prefix] [year] [contest name and other identifiers] [problem number]</code> (<a href="">see why</a>).If you do this properly, Contest Bot will send an image containing the problem. In addition, two reactions will appear on the message: a computer and a chain link.</p>
+        <ul>
+          <li>Clicking on the computer will reveal the LaTeX code for the problem, if you want to use it on your own TeX document.</li>
+          <li>Clicking on the chain link will reveal the url to the AoPS thread about the problem, if you would like to write your own solution that you're proud of or if you get stuck and want to see how the problem is solved.</li>
+        </ul>
+      <p>Note that the bot automatically removes the reactions after one minute.</p>
+      <h2 class="md-header">General Commands</h2>
+      <p>In order to use a command, you can use <code class="md-code">[prefix] [command] [arguments]</code> or substitute a ping for the prefix if you forget it. In order to pull up this menu on Discord, use <code class="md-code">[prefix] other</code>.<br /><br />Here are some of Contest Bot's other commands:</p>
+        <ul>
+          <li>
+            <code class="md-code">contests</code>
+          </li>
+        </ul>
+      <p>You can use this to see the full list of all available contests. React with the left or right arrows to browse the other pages (yes, there are that many contests!) In the list, you will see the alias of all competitions. Any of the keywords on the same line as the contest name can be used as aliases to request problems.</p>
+        <ul>
+          <li>
+            <code class="md-code">suggest contest</code>
+          </li>
+        </ul>
+      <p>This command is used if you want to suggest a contest that isn't already supported by Contest Bot. Just follow the prompts given by the bot, and soon you will be able to request problems from that contest!</p>
+        <ul>
+          <li>
+            <code class="md-code">bug report [content]</code>
+          </li>
+        </ul>
+      <p>If there is an issue with Contest Bot, use this command to tell us. Please be detailed, so that we know exactly what's bothering you. Note that bugs with LaTeX rendering are automatically reported, so those should <b>not</b> be an issue. However, any other issue should be reported.</p>
+      <h2 class="md-header">Development</h2>
+      <p>Like many things, Contest Bot is still under development. Fortunately, we're still looking for helpers! Take a look at our <a href="https://www.github.com/discord-contest-bot/discord-contest-bot">Github repository</a>, and join our <a href="https://discord.gg/C2sYVGb">support server</a> to get updates!</p>
+      <hr />
+      <p>Copyright © Discord Contest Bot Team, 2020</p>
     </div>
   </body>
 </html>

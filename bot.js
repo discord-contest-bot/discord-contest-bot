@@ -202,7 +202,7 @@ const supportedContests = [
   },
   {
     name: 'usa-tstst-links',
-    displayName: 'United States of America Team Selection Test for the Selection Test',
+    displayName: 'United States of America Team Selection Test for the Selection Team',
     aliases: [
       'United States of America Team Selection Test for the Selection Team',
       'USA Team Selection Test for the Selection Team',
@@ -213,9 +213,9 @@ const supportedContests = [
   },
   {
     name: 'usa-tst-links',
-    displayName: 'United States of America Team Selection Team',
+    displayName: 'United States of America Team Selection Test',
     aliases: [
-      'United States of America Team Selection Team',
+      'United States of America Team Selection Test',
       'USA Team Selection Test',
       'United States of America TST',
       'USA TST'
@@ -840,6 +840,14 @@ app.get("/", (req, res) => {
 
 app.get("/why-that-order", (req, res) => {
   res.sendFile(path.join(__dirname + '/website/why-that-order.html'));
+});
+
+app.get("/example", (req, res) => {
+  res.sendFile(path.join(__dirname + '/website/example-command.html'));
+});
+
+app.get("/example-command", (req, res) => {
+  res.sendFile(path.join(__dirname + '/website/example-command.html'));
 });
 
 app.get("/invite", (req, res) => {

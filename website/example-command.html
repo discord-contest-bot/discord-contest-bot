@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Discord Contest Bot</title>
+    <link rel="stylesheet" href="css/index.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+      document.addEventListener('copy', (event) => {
+        event.clipboardData.setData('text', (document.getSelection() + '').replace(/@Contest Bot/g, '@Contest Bot#7095'));
+        event.preventDefault();
+      });
+      const mentions = [{
+        actual: '#example-command__mention-contest-bot-7905',
+        hoverable: '#example-command__for__mention-contest-bot-7905',
+        size: 16
+      }];
+      mentions.forEach((mention, index) => {
+        $(document).ready(function() {
+          $(mention.actual).hover(function() {
+            $(mention.hoverable).css('display', 'inline-block');
+            $(mention.hoverable).html(`<div class="tooltip-mention" style="font-size: ` + mention.size + `px">
+              <img style=" border-radius: 50%; vertical-align: top; margin-right: 8px;" src="https://cdn.discordapp.com/avatars/746943730510200893/f7b072da2ae15e9a02ded70b02c557bf.png?size=128" alt=" " width="` + mention.size + `px" height="` + mention.size + `px">
+              Contest Bot<span class="dimmer">#7095</span>
+            </div>`);
+            $(mention.hoverable).css('top', $(mention.actual).offset().top - $(mention.hoverable).height() - 5);
+            $(mention.hoverable).css('left', $(mention.actual).offset().left + $(mention.actual).width() / 2 - $(mention.hoverable).width() / 2);
+          }, function() {
+            $(mention.hoverable).css('display', 'none');
+            $(mention.hoverable).html('');
+          });
+        });
+      });
+      const openModals = [{
+        actual: '#example-command__mention-contest-bot-7905',
+        html: '<h2 style="font-weight: 400"><span class="mention" aria-label="Contest Bot#7095" role="button" style="position: relative; font-weight: 900;" >@Contest Bot</span> 2002 ISL N3:</h2><br />In order to grab the bot\'s attention, you can choose to use a ping (<span class="mention" aria-label="Contest Bot#7095" role="button" style="position: relative;">@Contest Bot</span>) or the prefix (currently <code class="md-code">gimme</code>).'
+      }, {
+        actual: '#example-command__select-year',
+        html: '<h2 style="font-weight: 400"><span class="mention" aria-label="Contest Bot#7095" role="button" style="position: relative; font-weight: 400;" >@Contest Bot</span> <span style="font-weight: 900">2002</span> ISL N3:</h2><br />The bot needs a year to get a contest - in this case, we pass in 2002.'
+      }, {
+        actual: '#example-command__select-contest',
+        html: '<h2 style="font-weight: 400"><span class="mention" aria-label="Contest Bot#7095" role="button" style="position: relative; font-weight: 400;" >@Contest Bot</span> 2002 <span style="font-weight: 900">ISL</span> N3:</h2><br />We actually need material - a contest - that you request. In this case, we pass ISL (IMO Shortlist).'
+      }, {
+        actual: '#example-command__select-topic',
+        html: '<h2 style="font-weight: 400"><span class="mention" aria-label="Contest Bot#7095" role="button" style="position: relative; font-weight: 400;" >@Contest Bot</span> 2002 ISL <span style="font-weight: 900">N3</span>:</h2><br />Finally, we require some sort of problem. However, in some sorts of contests, such as the ISL, we need to pass in a topic as well, which should come between the year and the problem number.'
+      }, {
+        actual: '#example-command__recieve-information',
+        html: '<h2>Here\'s IMO Shortlist 2002 N/3</h2>This is the header information - you should check this is what you requested. For example, if you requested 2017 A5 and got 2002 N3, fill out a bug report. Note that the slash (N/3) is irrelevant (for the user purposes, while for us it means a lot), and should <b>not</b> have a bug report for that. In addition, this isn\'t particular to the ISL - in general, any contest should have similar behavior.'
+      }, {
+        actual: '#example-command__recieve-latex',
+        html: '<h2>LaTeX code - the computer emoji</h2>By clicking <img src="https://discordapp.com/assets/509dd485f6269e2521955120f3e8f0ef.svg" width="16px" height="16px"/>, the bot edits the LaTeX code into the message with the problem statement. Note that the LaTeX can be separately obtained by <code class="md-code">gimme latex [problem]</code> (adding the word latex anywhere in the query).'
+      }, {
+        actual: '#example-command__recieve-link',
+        html: '<h2>AoPS - the chain link emoji</h2>By clicking <img src="https://discordapp.com/assets/7c13aa0def6ccb6932f47dedd33f59c1.svg" width="16px" height="16px"/>, the bot edits the AoPS link into the message with the problem statement. Note that the link can be separately obtained by <code class="md-code">gimme link [problem]</code> (adding the word link anywhere in the query).'
+      }];
+      openModals.forEach((mention, index) => {
+        $(document).ready(function() {
+          $(mention.actual).click(function() {
+            $('#modal-text').html(mention.html);
+            $('#myModal').css('display', 'inline-block');
+          });
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div class="content-wrapper">
+      <h2 class="md-header">What you send:</h2>
+      <p>Click on the following pieces of text to get information on how to use them.</p>
+      <div class="md-code-block">
+        <span id="example-command__mention-contest-bot-7905" class="mention" aria-label="Contest Bot#7095" role="button" style="position: relative;">@Contest Bot</span> <span id="example-command__select-year" style="background-color: rgba(255, 0, 0, 0.3); cursor: pointer;">2002</span> <span id="example-command__select-contest" style="background-color: rgba(0, 255, 0, 0.3); cursor: pointer;">ISL</span> <span id="example-command__select-topic" style="background-color: rgba(255, 255, 0, 0.5); cursor: pointer;">N3</span>
+      </div>
+      <div id="example-command__for__mention-contest-bot-7905" style="position: absolute; display: none; top: -100%;"></div>
+      <h2 class="md-header">What you recieve:</h2>
+      <p>Click on the following pieces of information to understand what the bot sends you.</p>
+      <div class="md-code-block">
+        <span id="example-command__recieve-information" style="background-color: rgba(255, 0, 0, 0.3); cursor: pointer;">Here's IMO Shortlist 2002 N/3</span><br />
+        <img src="2002isln3.png"/><br />
+        <div class="emoji-wrapper" id="example-command__recieve-latex" style="background-color: rgba(0, 255, 0, 0.3); cursor: pointer;">
+          <img src="https://discordapp.com/assets/509dd485f6269e2521955120f3e8f0ef.svg" style="vertical-align: text-top" height="16px" width="16px" />
+          1
+        </div>
+        <div class="emoji-wrapper" id="example-command__recieve-link" style="background-color: rgba(255, 255, 0, 0.5); cursor: pointer;">
+          <img src="https://discordapp.com/assets/7c13aa0def6ccb6932f47dedd33f59c1.svg" style="vertical-align: middle" height="16px" width="16px" />
+          1
+        </div>
+      </div>
+      <div id="myModal" class="modal">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <p id="modal-text">asdfsadf</p>
+        </div>
+      </div>
+      <hr />
+      <p>Copyright © Discord Contest Bot Team, 2020</p>
+      <script>
+        var modal = document.getElementById("myModal");
+        var span = document.getElementsByClassName("close")[0];
+        span.onclick = function() {
+          modal.style.display = "none";
+        }
+        window.onclick = function(event) {
+          if (event.target == modal) {
+            modal.style.display = "none";
+          }
+        }
+      </script>
+    </div>
+  </body>
+</html>
