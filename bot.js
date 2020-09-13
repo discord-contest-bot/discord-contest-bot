@@ -489,6 +489,9 @@ const getProblemInfo = async (message, link) => {
       }
     }
     let problemNumber = !noProblem ? numbers[1] : 0;
+    if (!numbers[1] || !numbers) {
+      noProblem = true;
+    }
     if (contest.type === 'shortlist' && !noTopic) {
       if (parseInt(year) >= contest.firstCategory && !(contest.needsNumber && parseInt(year) <= contest.lastNeeded )) {
         if (!numbers || !numbers[1]) {
@@ -552,6 +555,7 @@ const getProblemInfo = async (message, link) => {
     }
     else if (noProblem) {
       if (problemNumber) {
+        console.log(problemNumber);
         if (!contestInfo.val()[year][problemNumber]) {
           message.channel.send("I couldn't find that topic!");
           return;
@@ -559,7 +563,9 @@ const getProblemInfo = async (message, link) => {
         problemNumber += '/' + Object.keys(contestInfo.val()[year][problemNumber])[Math.floor(Math.random() * Object.keys(contestInfo.val()[year][problemNumber]).length)];
       }
       else {
-        problemNumber = Object.keys(contestInfo.val()[year])[Math.floor(Math.random() * Object.keys(contestInfo.val()[year]).length)];
+        const problems = Object.keys(contestInfo.val()[year]);
+        problems.splice(problems.indexOf('link'), 1);
+        problemNumber = problems[Math.floor(Math.random() * problems.length)];
       }
     }
     const preliminaryProblem = await firebase.database().ref().child(contest.name).child(year).child(problemNumber).once('value');
