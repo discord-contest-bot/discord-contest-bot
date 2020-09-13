@@ -482,9 +482,11 @@ const getProblemInfo = async (message, link) => {
         return;
       }
     }
-    if (noProblem || !numbers || !numbers[1]) {
-      console.log(contestInfo.val()[year]['link']);
-      return { problem: { link: contestInfo.val()[year]['link'] }};
+    if (link) {
+      if (noProblem || !numbers || !numbers[1]) {
+        console.log(contestInfo.val()[year]['link']);
+        return { problem: { link: contestInfo.val()[year]['link'] }};
+      }
     }
     let problemNumber = !noProblem ? numbers[1] : 0;
     if (contest.type === 'shortlist' && !noTopic) {
@@ -834,6 +836,10 @@ app.listen(port, () => {
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname + '/website/index.html'));
+});
+
+app.get("/why-that-order", (req, res) => {
+  res.sendFile(path.join(__dirname + '/website/why-that-order.html'));
 });
 
 app.get("/invite", (req, res) => {
