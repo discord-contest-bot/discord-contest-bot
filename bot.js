@@ -331,6 +331,7 @@ const supportedContests = [
     displayName: 'AMC 8',
     aliases: [
       'AMC 8',
+      'AJHSME'
     ],
     type: 'regular'
   },
@@ -346,7 +347,7 @@ const supportedContests = [
       'B',
       'P'
     ],
-    firstCategory: 1776,
+    firstCategory: 2002,
     maxChar: 1,
     needsNumber: false
   },
@@ -355,6 +356,7 @@ const supportedContests = [
     displayName: 'AMC 12',
     aliases: [
       'AMC 12',
+      'AHSME'
     ],
     type: 'shortlist',
     categories: [
@@ -362,7 +364,7 @@ const supportedContests = [
       'B',
       'P'
     ],
-    firstCategory: 1776,
+    firstCategory: 2002,
     maxChar: 1,
     needsNumber: false
   },
