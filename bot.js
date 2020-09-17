@@ -93,6 +93,17 @@ const makeLatex = str => {
 */
 const supportedContests = [
   {
+    name: 'pamo-links',
+    displayName: 'Pan African Math Olympiad',
+    aliases: [
+      'PAMO',
+      'Pan African',
+      'Pan African MO',
+      'Pan African Math Olympiad'
+    ],
+    type: 'regular'
+  },
+  {
     name: 'isl-links',
     displayName: 'IMO Shortlist',
     aliases: [
@@ -401,6 +412,37 @@ const supportedContests = [
     ],
     type: 'regular'
   },
+  {
+    name: 'inmo-links',
+    displayName: 'Indian National Olympiad',
+    aliases: [
+      'INMO',
+      'India',
+      'Indian MO',
+      'Indian National Olympiad'
+    ],
+    type: 'regular'
+  },
+  {
+    name: 'aro-links',
+    displayName: 'All-Russian Mathematical Olympiad',
+    aliases: [
+      'ARO',
+      'ARMO',
+      'All-Russian MO',
+      'All-Russian Mathematical Olympiad'
+    ],
+    type: 'shortlist',
+    categories: [
+      '9',
+      '11',
+      '10'
+    ],
+    firstCategory: 1993,
+    maxChar: 0,
+    needsNumber: true,
+    lastNeeded: 3030
+  },
 ]
 
 const checkInclude = (arr, str) => {
@@ -509,7 +551,6 @@ const getProblemInfo = async (message, link) => {
         }
         else if (contest.picky && (!noProblem ? message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[1], message.content.indexOf(numbers[0]) + numbers[0].length)) : message.content.substring(message.content.indexOf(numbers[0]))).includes(contest.keyword.toLowerCase())) {
           if (!letters[1]) {
-            message.channel.send("Specifications say I need something more specific, like November GENERAL (for HMMT). Provide that please");
             noTopic = true;
             noProblem = true;
           }
@@ -530,8 +571,8 @@ const getProblemInfo = async (message, link) => {
           if (!numbers[2]) {
             noProblem = true;
           }
-          const letters = !noProblem ? message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[2], message.content.indexOf(numbers[0]) + numbers[0].length)).match(/[a-zA-Z]+/g) : message.content.substring(message.content.indexOf(numbers[0])).match(/[a-zA-Z]+/g);
-          if (!letters && parseInt(year) >= contest.firstCategory) {
+          let letters = !noProblem ? message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[2], message.content.indexOf(numbers[0]) + numbers[0].length)).match(/[a-zA-Z]+/g) : message.content.substring(message.content.indexOf(numbers[0])).match(/[a-zA-Z]+/g);
+          if (!letters && contest.maxChar > 0 && parseInt(year) >= contest.firstCategory) {
             noTopic = true;
           }
           else if (contest.picky && (!noProblem ? message.content.substring(message.content.indexOf(numbers[0]), message.content.indexOf(numbers[2], message.content.indexOf(numbers[0]) + numbers[0].length)) : message.content.substring(message.content.indexOf(numbers[0]))).includes(contest.keyword.toLowerCase())) {
@@ -543,6 +584,9 @@ const getProblemInfo = async (message, link) => {
             }
           }
           else {
+            if (!letters) {
+              letters = [''];
+            }
             problemNumber = !noProblem ? (letters[0].substring(0, contest.maxChar) + numbers[1] + '/' + numbers[2]).toUpperCase() : (letters[0].substring(0, contest.maxChar) + numbers[1]).toUpperCase();
           }
         }
