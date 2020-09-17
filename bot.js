@@ -798,7 +798,8 @@ client.on('message', async message => {
     return;
   }
   const msg = await message.channel.send('Fetched ' + contest.displayName + ' ' + year + ' ' + problemNumber + '. Now trying to render that.');
-  const output = fs.createWriteStream(path.join(__dirname, "output.pdf"))
+  const suffix = Date.now() % 100;
+  const output = fs.createWriteStream(path.join(__dirname, "output" + suffix + ".pdf"))
   const pdf = latex(makeLatex(noAsy(problem.statement)));
 
   pdf.pipe(output)
@@ -807,7 +808,7 @@ client.on('message', async message => {
     client.channels.cache.get('747232085600632902').send('There has been an error with ' + contest.displayName + ' ' + year + ' ' + problemNumber + '. The error is as follows:\n' + err);
   });
   pdf.on('finish', () => {
-    exec("convert -resize '4000' -density 288 /app/output.pdf +negate -bordercolor transparent -border 30 -background black -flatten /app/output.png", (err, stderr, stdout) => {
+    exec("convert -resize '4000' -density 288 /app/output" + suffix + ".pdf +negate -bordercolor transparent -border 30 -background black -flatten /app/output" + suffix + ".png", (err, stderr, stdout) => {
       if (err) {
         message.channel.send('Looks like there\'s an error: ' + err + '. Please directly message <@!446065841172250638>');
         client.channels.cache.get('747232085600632902').send('There has been an error with ' + contest.displayName + ' ' + year + ' ' + problemNumber + '. The error is as follows:\n' + err);
@@ -819,7 +820,7 @@ client.on('message', async message => {
         return;
       }
       msg.delete();
-      message.channel.send('Here\'s ' + contest.displayName + ' ' + year + ' ' + problemNumber, {files: ['output.png']}).then(msg => createReactions(message, ['💻', '🔗'], [(message, clicked, i) => {
+      message.channel.send('Here\'s ' + contest.displayName + ' ' + year + ' ' + problemNumber, {files: ['output' + suffix '.png']}).then(msg => createReactions(message, ['💻', '🔗'], [(message, clicked, i) => {
         if (!clicked) {
           message.edit(message.content + '\nLaTeX:```'+ latexify(noAsy(problem.statement)) + '```');
           return 0;
