@@ -62,7 +62,7 @@ const latexify = str => {
     .replace(/(\\\\\[[\d]*\\baselineskip\])\\begin\{tabular\}/g, '$1 \\begin\{tabular\}').replace(/\\end\{tabular\}(\\\\\[[\d]*\\baselineskip\])/g, '\\end\{tabular\} $1')       //Protect newlines around tabular
     .replace(/\\\\\[[\d]*\\baselineskip\]\\begin\{/g, '\\begin\{').replace(/\\begin\{([^}]*)\}\\\\\[[\d]*\\baselineskip\]/g, '\\begin\{$1\}')         //Replace newlines around \begin{environment}
     .replace(/\\\\\[[\d]*\\baselineskip\]\\end\{/g, '\\end\{').replace(/\\end\{([^}]*)\}\\\\\[[\d]*\\baselineskip\]/g, '\\end\{$1\}')                 //Replace newlines around \end{environment}
-    .replace(/\$([\d]+)(\.)*([\d]*)(\s)([a-zA-Z])/g, '\\\$$$1$2$3$4$5').replace(/−/g, '-');                                                           //Replace in the form $[number with or without decimal][space][letter] with \$[number with or without decimal][space][letter], and U+2212 with -
+    .replace(/\$([\d]+)(\.)*([\d]*)([\,]*)(\s)([a-zA-Z])/g, '\\\$$$1$2$3$4$5$6').replace(/−/g, '-');                                                           //Replace in the form $[number with or without decimal][space][letter] with \$[number with or without decimal][space][letter], and U+2212 with -
 };
 
 const makeLatex = str => {
