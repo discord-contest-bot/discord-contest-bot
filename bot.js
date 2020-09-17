@@ -820,7 +820,7 @@ client.on('message', async message => {
         return;
       }
       msg.delete();
-      message.channel.send('Here\'s ' + contest.displayName + ' ' + year + ' ' + problemNumber, {files: ['output' + suffix '.png']}).then(msg => createReactions(message, ['💻', '🔗'], [(message, clicked, i) => {
+      message.channel.send('Here\'s ' + contest.displayName + ' ' + year + ' ' + problemNumber, {files: ['output' + suffix + '.png']}).then(msg => createReactions(message, ['💻', '🔗'], [(message, clicked, i) => {
         if (!clicked) {
           message.edit(message.content + '\nLaTeX:```'+ latexify(noAsy(problem.statement)) + '```');
           return 0;
