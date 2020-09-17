@@ -53,11 +53,13 @@ const latexify = str => {
       totalN = -1;
     }
   }
+  console.log(str);
   return str.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/<i>/g, '\\textit\{').replace(/<\/i>|<\/b>/g, '\}').replace(/<b>/g, '\\textbf\{')    //Replace <, >, \textit, \textbf
     .replace(/<li[^>]*>/g, '\\item ').replace(/<\/li>/g, '').replace(/<ol[^>]*>/g, '\\begin{enumerate}').replace(/<\/ol>/g, '\\end{enumerate}')       //Replace \item, \begin{enumerate}
     .replace(/<ul[^>]*>/g, '\\begin{itemize}').replace(/<\/ul>/g, '\\end{itemize}').replace(/\&ge\;|\&gte\;/g, '\\ge').replace(/\&amp\;/g, '\\\&')    //Replace \end{itemize}, \geq, \&
     .replace(/\&nbsp;/g, '').replace(/<hr[^>]*>/g, '\\rule\{\\linewidth\}{0.5mm}')                                                                    //Replace all &nbsp;, <hr />
     .replace(/\\\\\[[\d]*\\baselineskip\]\\item/g, '\\item').replace(/\\item\\\\\[[\d]*\\baselineskip\]/g, '\\item')                                  //Replace newlines around \item
+    .replace(/(\\\\\[[\d]*\\baselineskip\])\\begin\{tabular\}/g, '$1 \\begin\{tabular\}').replace(/\\end\{tabular\}(\\\\\[[\d]*\\baselineskip\])/g, '\\end\{tabular\} $1')       //Protect newlines around tabular
     .replace(/\\\\\[[\d]*\\baselineskip\]\\begin\{/g, '\\begin\{').replace(/\\begin\{([^}]*)\}\\\\\[[\d]*\\baselineskip\]/g, '\\begin\{$1\}')         //Replace newlines around \begin{environment}
     .replace(/\\\\\[[\d]*\\baselineskip\]\\end\{/g, '\\end\{').replace(/\\end\{([^}]*)\}\\\\\[[\d]*\\baselineskip\]/g, '\\end\{$1\}')                 //Replace newlines around \end{environment}
     .replace(/\$([\d]+)(\.)*([\d]*)(\s)([a-zA-Z])/g, '\\\$$$1$2$3$4$5').replace(/−/g, '-');                                                           //Replace in the form $[number with or without decimal][space][letter] with \$[number with or without decimal][space][letter], and U+2212 with -
