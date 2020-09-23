@@ -20,6 +20,7 @@ const createReactions = async (message, reactions, functions, msg, fill) => {
     return i;
   }
   const createCollectorMessage = async (message, getList) => {
+    let hasReacted = false;
     let i = 0;
     const collector = message.createReactionCollector(fill || filter, { time: reactTime });
     await collector.on('collect', async (r, user) => {
@@ -28,7 +29,10 @@ const createReactions = async (message, reactions, functions, msg, fill) => {
         await message.react(r.emoji);
       }
       catch (e) {
-        message.channel.send("I don't have permissions to manage reactions. Ask the higher ups to grant me this AWESOME power so I can actually tell what you want.")
+        if (!hasReacted) {
+          message.channel.send("I don't have permissions to manage reactions. Ask the higher ups to grant me this AWESOME power so I can actually tell what you want.")
+          hasReacted = true;
+        }
       }
       i = await onCollect(r.emoji, message, i, getList);
     });
