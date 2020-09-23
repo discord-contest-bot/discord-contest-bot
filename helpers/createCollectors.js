@@ -25,11 +25,11 @@ const createReactions = async (message, reactions, functions, msg, fill) => {
     await collector.on('collect', async (r, user) => {
       try {
         await r.users.remove(user.id);
+        await message.react(r.emoji);
       }
       catch (e) {
         message.channel.send("I don't have permissions to manage reactions. Ask the higher ups to grant me this AWESOME power so I can actually tell what you want.")
       }
-      await message.react(r.emoji);
       i = await onCollect(r.emoji, message, i, getList);
     });
     collector.on('end', collected => message.reactions.removeAll());
