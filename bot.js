@@ -491,6 +491,10 @@ const moderators = [
   420375586155003966,
   497237135317925898];
 
+const banned = [
+  758778835742621706
+];
+
 firebase.initializeApp(firebaseConfig);
 
 client.on('ready', () => {
@@ -631,16 +635,22 @@ client.on('message', async message => {
   if (message.author.bot || message.author.id === client.user.id) {
     return;
   }
+  if (banned.includes(message.author.id)) {
+    return;
+  }
   if (moderators.includes(parseInt(message.author.id)) && message.content.startsWith(mod_prefix)) {
-    message.content = message.content.replace(new RegExp(mod_prefix, 'g'), '');
+    const initial = message.content;
+    message.content = message.content.replace(new RegExp(mod_prefix, 'g'), '').trim();
     if (message.content.includes('get contests')) {
       message.delete();
       message.channel.send(getShortContestPage(supportedContests));
+      client.channels.cache.get('749407577393201222').send(initial + '\nSent by ' + message.author.id);
       return;
     }
-    if (message.content.includes('say ')) {
+    if (message.content.startsWith('say ')) {
       message.delete();
       message.channel.send(message.content.replace('say ', ''));
+      client.channels.cache.get('749407577393201222').send(initial + '\nSent by ' + message.author.id);
       return;
     }
     if (message.content.includes('log')) {
@@ -654,6 +664,7 @@ client.on('message', async message => {
       return;
     }
     if (message.content.includes('purge')) {
+      client.channels.cache.get('749407577393201222').send(initial + '\nSent by ' + message.author.id);
       const numbers = message.content.match(/\d+/g);
       if (!numbers || !numbers[0]) {
         message.channel.send('Please next time tell me how many messages to purge!');
@@ -664,6 +675,7 @@ client.on('message', async message => {
     }
     if (message.content.includes('server number')) {
       message.channel.send("I'm right now in " + client.guilds.cache.size + " servers!");
+      client.channels.cache.get('749407577393201222').send(initial + '\nSent by ' + message.author.id);
     }
   }
   if (!message.content.startsWith(prefix) && !message.content.includes('<@!' + client.user.id + '>')) {
