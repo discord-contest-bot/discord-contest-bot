@@ -895,7 +895,7 @@ client.on('message', async message => {
   });
 });
 
-//client.login(process.env.BOT_TOKEN);
+client.login(process.env.BOT_TOKEN);
 
 app.use(express.static('website'))
 
