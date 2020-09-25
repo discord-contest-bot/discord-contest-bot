@@ -489,7 +489,8 @@ const moderators = [
   556270124936724490,
   508676556801966114,
   420375586155003966,
-  497237135317925898];
+  497237135317925898
+];
 
 const banned = [
   758778835742621706
@@ -894,7 +895,7 @@ client.on('message', async message => {
   });
 });
 
-client.login(process.env.BOT_TOKEN);
+//client.login(process.env.BOT_TOKEN);
 
 app.use(express.static('website'))
 
