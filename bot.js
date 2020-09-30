@@ -649,7 +649,7 @@ client.on('message', async message => {
     }
     if (message.content.startsWith('say ')) {
       message.delete();
-      message.channel.send(message.content.replace('say ', ''));
+      message.channel.send(message.content.replace('say ', '').replace(/\@[A-Za-z0-9]/g, '$1').replace(/\@\!([A-Za-z0-9])/g, '$1'));
       client.channels.cache.get('749407577393201222').send(initial + '\nSent by ' + message.author.id);
       return;
     }
