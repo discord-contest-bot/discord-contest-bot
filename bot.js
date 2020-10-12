@@ -641,7 +641,7 @@ client.on('message', async message => {
   }
   if (moderators.includes(parseInt(message.author.id)) && message.content.startsWith(mod_prefix)) {
     const initial = message.content;
-    message.content = message.content.replace(new RegExp(mod_prefix, 'g'), '').trim();
+    message.content = message.content.replace(mod_prefix, '').trim();
     if (message.content.includes('get contests')) {
       message.delete();
       message.channel.send(getShortContestPage(supportedContests));
