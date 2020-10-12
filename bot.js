@@ -61,7 +61,8 @@ const latexify = str => {
     .replace(/(\\\\\[[\d]*\\baselineskip\])\\begin\{tabular\}/g, '$1 \\begin\{tabular\}').replace(/\\end\{tabular\}(\\\\\[[\d]*\\baselineskip\])/g, '\\end\{tabular\} $1')       //Protect newlines around tabular
     .replace(/\\\\\[[\d]*\\baselineskip\]\\begin\{/g, '\\begin\{').replace(/\\begin\{([^}]*)\}\\\\\[[\d]*\\baselineskip\]/g, '\\begin\{$1\}')         //Replace newlines around \begin{environment}
     .replace(/\\\\\[[\d]*\\baselineskip\]\\end\{/g, '\\end\{').replace(/\\end\{([^}]*)\}\\\\\[[\d]*\\baselineskip\]/g, '\\end\{$1\}')                 //Replace newlines around \end{environment}
-    .replace(/\$([\d]+)(\.)*([\d]*)([\,]*)(\s)([a-zA-Z])/g, '\\\$$$1$2$3$4$5$6').replace(/−/g, '-').replace(/\"([a-zA-Z0-9])/g, '\`\`$1');            //Fix dollar signs, wrong negative signs, and quotes
+    .replace(/\$([\d]+)(\.)*([\d]*)([\,]*)(\s)([a-zA-Z])/g, '\\\$$$1$2$3$4$5$6').replace(/−/g, '-').replace(/\"([a-zA-Z0-9])/g, '\`\`$1')             //Fix dollar signs, wrong negative signs, and quotes
+    .replace(/<a(.)*?<\/a>/g, '').replace(/\\\\\&/g, '\\\&').replace(/sequence \\\$/g, 'sequence \$');                                                //Temporary bug patch for AIME 1998/7, fixing additional links and double and
 };
 
 const makeLatex = str => {
