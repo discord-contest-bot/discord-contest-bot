@@ -529,7 +529,7 @@ const getProblemInfo = async (message, link) => {
       noProblem = true;
     }
     else {
-      year = numbers[0];
+      year = yearAlias(numbers[0]);
       if (!Object.keys(contestInfo.val()).includes(year)) {
         message.channel.send("That's not a valid year!");
         return;
@@ -631,6 +631,18 @@ const getProblemInfo = async (message, link) => {
     }
     return { problem, contest, year, problemNumber };
   }
+};
+
+const yearAlias = year => {
+  	let currentYear = new Date().getFullYear();
+
+	if (year.length != 2) {
+		return year;
+	}
+	if (parseInt(year) <= currentYear - 2000) {
+		return "20" + year;
+	}
+	return "19" + year;
 };
 
 client.on('message', async message => {
