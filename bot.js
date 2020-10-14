@@ -519,25 +519,50 @@ const getProblemInfo = async (message, link) => {
     }
     message.content = deepReplace(contest.aliases, message.content);
     const contestInfo = await firebase.database().ref().child(contest.name).once('value');
-    const numbers = message.content.match(/\d+/g);
+	
+		// check if there are 2 open [, if yes, throw error
+		if (message.content.match(/\[[^\]]*\[/g)) {
+			message.channel.send("Invalid bracketing for a random over an interval. (Don't nest your brackets!)");
+			return;
+		}
+
+		// find any integers that dont have ] after them or any expressions of the form [a, b] 
+    const numbers = message.content.match(/[\d]+(?![^\[]*\])|\[\s*\d+\s*\,\s*\d+\s*\]/g);
+
+		//console.log(numbers);
+
     let year;
     let noTopic = false;
     let noProblem = false;
     if (!numbers) {
-      year = Object.keys(contestInfo.val())[Math.floor(Math.random() * Object.keys(contestInfo.val()).length)];
+      year = pickRandom(Object.keys(contestInfo.val()));
       noTopic = true;
       noProblem = true;
     }
     else {
-      year = yearAlias(numbers[0]);
-      if (!Object.keys(contestInfo.val()).includes(year)) {
-        message.channel.send("That's not a valid year!");
-        return;
-      }
+      year = numbers[0];
+			// if its an interval
+			if (year.includes(",")) {
+				let lower = parseInt(yearAlias(year.match(/\d+/g)[0])), upper = parseInt(yearAlias(year.match(/\d+/g)[1]));
+
+				let possibleYears = Object.keys(contestInfo.val()).filter(year => (parseInt(year) >= lower && parseInt(year) <= upper));
+				if (!possibleYears[0]) {
+        	message.channel.send("That interval doesn't contain any valid years!");
+        	return;
+				}
+				year = pickRandom(possibleYears);
+			}
+      else {
+				year = yearAlias(year);
+					if (!Object.keys(contestInfo.val()).includes(year)) {
+					message.channel.send("That's not a valid year!");
+					return;
+				}
+			}
+			//console.log(year);
     }
     if (link) {
       if (noProblem || !numbers || !numbers[1]) {
-        console.log(contestInfo.val()[year]['link']);
         return { problem: { link: contestInfo.val()[year]['link'] }};
       }
     }
@@ -610,7 +635,6 @@ const getProblemInfo = async (message, link) => {
     }
     else if (noProblem) {
       if (problemNumber) {
-        console.log(problemNumber);
         if (!contestInfo.val()[year][problemNumber]) {
           message.channel.send("I couldn't find that topic!");
           return;
@@ -623,6 +647,22 @@ const getProblemInfo = async (message, link) => {
         problemNumber = problems[Math.floor(Math.random() * problems.length)];
       }
     }
+		
+		// if problem number is actually an interval
+		if (problemNumber.includes(".")) {
+			let lower = parseInt(problemNumber.match(/\d+/g)[0]), upper = parseInt(problemNumber.match(/\d+/g)[1]);
+			let prefixLength = problemNumber.indexOf("[");
+			let prefix = problemNumber.substring(0, prefixLength);
+
+			let possibleProblemNumbers = Object.keys(contestInfo.val())[year].filter(problem => (problem.substring(0, prefixLength) === prefix && parseInt(problem.substring(prefixLength)) >= lower && parseInt(problem.substring(prefixLength)) <= upper));
+			
+			if (!possibleProblemNumbers) {
+        message.channel.send("That interval doesn't contain any valid problems!");
+        return;
+			}
+			problemNumber = pickRandom(possibleProblemNumbers);
+		}
+
     const preliminaryProblem = await firebase.database().ref().child(contest.name).child(year).child(problemNumber).once('value');
     const problem = preliminaryProblem.val();
     if (!problem) {
@@ -644,6 +684,10 @@ const yearAlias = year => {
 	}
 	return "19" + year;
 };
+
+const pickRandom = array => {
+	return array[Math.floor(Math.random() * array.length)];
+}
 
 client.on('message', async message => {
   if (message.author.bot || message.author.id === client.user.id) {
@@ -857,7 +901,7 @@ client.on('message', async message => {
   if (!result) return;
   const { problem, contest, year, problemNumber } = result;
   if (!!process.env.NO_RENDER) {
-    message.channel.send('```latex' + makeLatex(noAsy(problem.statement)) + '```').then(msg => createReactions(message, ['💻', '🔗'], [(message, clicked, i) => {
+    message.channel.send('Fetched ' + contest.displayName + ' ' + year + ' ' + problemNumber + '.```latex' + makeLatex(noAsy(problem.statement)) + '```').then(msg => createReactions(message, ['💻', '🔗'], [(message, clicked, i) => {
       if (!clicked) {
         message.edit(message.content + '\nLaTeX:```latex'+ latexify(noAsy(problem.statement)) + '```');
         return 0;
