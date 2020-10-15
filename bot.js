@@ -41,6 +41,8 @@ const latexify = str => {
   str = replaceSubstring(str, '\\begin\{align\*\}', '\&amp;', '\&', '\\end\{align\*\}');
   str = replaceSubstring(str, '\\begin\{cases\}', '\&amp;', '\&', '\\end\{cases\}');
   str = replaceSubstring(str, '\\begin\{array\}', '\&amp;', '\&', '\\end\{array\}');
+  str = replaceSubstring(str, '\\begin\{eqnarray\}', '\&amp;', '\&', '\\end\{eqnarray\}');
+  str = replaceSubstring(str, '\\begin\{eqnarray*\}', '\&amp;', '\&', '\\end\{eqnarray*\}');
   str = replaceSubstring(str, '\\begin\{tabular\}', '\&amp;', '\&', '\\end\{tabular\}');
   let totalN = -1;
   for (let i = 0; i < str.length; i ++) {
@@ -648,19 +650,33 @@ const getProblemInfo = async (message, link) => {
       }
     }
 		
+		//console.log(problemNumber);
 		// if problem number is actually an interval
-		if (problemNumber.includes(".")) {
+		if (problemNumber.includes(",")) {
 			let lower = parseInt(problemNumber.match(/\d+/g)[0]), upper = parseInt(problemNumber.match(/\d+/g)[1]);
-			let prefixLength = problemNumber.indexOf("[");
-			let prefix = problemNumber.substring(0, prefixLength);
+			let prefix = problemNumber.indexOf("[");
 
-			let possibleProblemNumbers = Object.keys(contestInfo.val())[year].filter(problem => (problem.substring(0, prefixLength) === prefix && parseInt(problem.substring(prefixLength)) >= lower && parseInt(problem.substring(prefixLength)) <= upper));
-			
-			if (!possibleProblemNumbers) {
+			let numProblems = contestInfo.val()[year].length;
+			let category = "";
+
+			// if there is a category, we need to deal with the extra layer
+			if (prefix > 0) {
+				category = problemNumber.substring(0, prefix - 1);
+				numProblems = contestInfo.val()[year][category].length;
+			}
+
+			let possibleProblemNumbers = Array.from(Array(numProblems).keys()).filter(index => (index >= lower && index <= upper));
+			//console.log(possibleProblemNumbers);
+
+			if (!possibleProblemNumbers[0]) {
         message.channel.send("That interval doesn't contain any valid problems!");
         return;
 			}
 			problemNumber = pickRandom(possibleProblemNumbers);
+
+			if (prefix > 0) {
+				problemNumber = category + "/" + problemNumber;
+			}
 		}
 
     const preliminaryProblem = await firebase.database().ref().child(contest.name).child(year).child(problemNumber).once('value');
