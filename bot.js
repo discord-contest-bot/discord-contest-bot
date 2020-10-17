@@ -656,17 +656,18 @@ const getProblemInfo = async (message, link) => {
 			let lower = parseInt(problemNumber.match(/\d+/g)[0]), upper = parseInt(problemNumber.match(/\d+/g)[1]);
 			let prefix = problemNumber.indexOf("[");
 
-			let numProblems = contestInfo.val()[year].length;
+			let numProblems = Array.isArray(contestInfo.val()[year]) ? contestInfo.val()[year].length : Object.keys(contestInfo.val()[year]).length;
 			let category = "";
 
 			// if there is a category, we need to deal with the extra layer
 			if (prefix > 0) {
+				//console.log("prefix");
 				category = problemNumber.substring(0, prefix - 1);
-				numProblems = contestInfo.val()[year][category].length;
+				numProblems = Array.isArray(contestInfo.val()[year][category]) ? contestInfo.val()[year][category].length : Object.keys(contestInfo.val()[year][category]).length;
 			}
 
 			let possibleProblemNumbers = Array.from(Array(numProblems).keys()).filter(index => (index >= lower && index <= upper));
-			//console.log(possibleProblemNumbers);
+			//console.log(numProblems);
 
 			if (!possibleProblemNumbers[0]) {
         message.channel.send("That interval doesn't contain any valid problems!");
